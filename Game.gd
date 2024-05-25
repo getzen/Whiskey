@@ -67,6 +67,7 @@ var jokers_played_count: int
 
 # These is set in prepare_for_new_trick()
 var lead_card: Card
+var winning_card: Card
 var trick_winner: int # player
 
 var we_points: int
@@ -489,15 +490,19 @@ func mark_cards_eligible_for_play() -> void:
 			card.eligible = 1
 			continue
 		
-		# Matches lead suit?
+		# Cards matching lead suit are always eligible.
 		if card.suit == self.lead_card.suit:
 			card.eligible = 1
 			continue
-		
+			
 		# Lead card is trump and this card is Joker?
 		if self.lead_card.suit == self.trump_suit && card.suit == Card.Suit.JOKER:
-			print("JOKER !!!")
 			card.eligible == 1
+			continue
+		
+		# If Joker is lead, trump suited cards are eligible.
+		if self.lead_card.suit == Card.Suit.JOKER && card.suit == self.trump_suit:
+			card.eligible = 1
 			continue
 		
 		if !has_lead_suit_determined: # determine once
@@ -505,11 +510,18 @@ func mark_cards_eligible_for_play() -> void:
 			has_lead_suit = self.has_card_with_suit(self.active_player, self.lead_card.suit)
 		
 		# Must play card matching lead suit if possible, and this card doesn't.
-		if has_lead_suit:
-			card.eligible = 0
-		else:
+		if !has_lead_suit:
 			card.eligible = 1
-				
+			continue
+		
+		card.eligible = 0
+	
+	#var eligible = 0
+	#for card: Card in player.hand:
+		#if card.eligible == 1:
+			#eligible += 1
+	#print("eligible count: ", eligible)
+		
 	if self.view_exists:
 		emit_signal("hand_updated", self.active_player, player.hand, false) #player.is_bot
 		
@@ -581,6 +593,7 @@ func discards_done() -> void:
 		
 func prepare_for_new_trick() -> void:
 	self.lead_card = null
+	self.winning_card = null
 	self.trick_winner = -1
 	self.trick.clear()
 	for i in self.player_count:
@@ -600,17 +613,31 @@ func play_card(card_id: int) -> void:
 			
 			if self.lead_card == null:
 				self.lead_card = card
+				self.winning_card = card
 				self.trick_winner = p_id
 			else:
 				if card.suit == self.lead_card.suit:
-					if card.rank > self.lead_card.rank:
-						self.lead_card = card
+					if card.rank > self.winning_card.rank:
+						self.winning_card = card
 						self.trick_winner = p_id
 				elif card.suit == self.trump_suit:
-					self.lead_card = card
-					self.trick_winner = p_id
+					if self.winning_card.suit != self.trump_suit:
+						self.winning_card = card
+						self.trick_winner = p_id
+					else:
+						if card.rank > self.winning_card.rank:
+							self.winning_card = card
+							self.trick_winner = p_id
 			
 			if card.suit == Card.Suit.JOKER:
+				if self.winning_card.suit == self.trump_suit:
+					if card.rank > self.winning_card.rank:
+						self.winning_card = card
+						self.trick_winner = p_id
+				else:
+					self.winning_card = card
+					self.trick_winner = p_id
+					
 				self.jokers_played_count += 1
 				if self.jokers_played_count == 1:
 					self.update_second_joker()
