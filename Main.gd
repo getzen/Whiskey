@@ -38,7 +38,7 @@ func _ready():
 	self.game.trick_updated.connect(self._on_trick_updated)
 	self.game.trick_awarded.connect(self._on_trick_awarded)
 	self.game.points_updated.connect(self.view._on_points_updated)
-	self.game.card_points_updated.connect(self.view._on_card_points_updated)
+	self.game.joker_updated.connect(self.view._on_joker_updated)
 	
 	self.add_child(self.game)
 	self.game.setup(4)

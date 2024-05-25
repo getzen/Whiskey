@@ -252,6 +252,6 @@ func _on_points_updated(we_hand: int, they_hand: int, we_total: int, they_total:
 	$GUI/Score/HBoxContainer/WeColumn/TotalPoints.text = str(we_total)
 	$GUI/Score/HBoxContainer/TheyColumn/TotalPoints.text = str(they_total)
 
-func _on_card_points_updated(card: Card) -> void:
+func _on_joker_updated(card: Card) -> void:
 	var node = self.find_card_node(card.id)
 	node.set_points(card.points)

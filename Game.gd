@@ -45,7 +45,7 @@ signal get_play(player, is_bot, cards)
 signal trick_updated(cards)
 signal trick_awarded(player, cards)
 signal points_updated(we_hand, they_hand, we_total, they_total)
-signal card_points_updated(card)
+signal joker_updated(card)
 
 var player_count: int = 4
 var deck: Array[Card]
@@ -397,12 +397,13 @@ func prepare_for_new_hand() -> void:
 	self.trump_suit = -1 # will be assigned a Card.Suit
 	self.jokers_played_count = 0
 	
-	# Restore joker points
+	# Restore jokers
 	for id in self.joker_ids:
 		var card = self.find_card_in_deck(id)
 		card.points = 0
+		card.rank = 15.0
 		if self.view_exists:
-			emit_signal("card_points_updated", card)
+			emit_signal("joker_updated", card)
 		
 	
 	for player in self.players:
@@ -493,7 +494,13 @@ func mark_cards_eligible_for_play() -> void:
 			card.eligible = 1
 			continue
 		
-		if !has_lead_suit_determined: # determined once
+		# Lead card is trump and this card is Joker?
+		if self.lead_card.suit == self.trump_suit && card.suit == Card.Suit.JOKER:
+			print("JOKER !!!")
+			card.eligible == 1
+			continue
+		
+		if !has_lead_suit_determined: # determine once
 			has_lead_suit_determined = true
 			has_lead_suit = self.has_card_with_suit(self.active_player, self.lead_card.suit)
 		
@@ -504,7 +511,7 @@ func mark_cards_eligible_for_play() -> void:
 			card.eligible = 1
 				
 	if self.view_exists:
-		emit_signal("hand_updated", self.active_player, player.hand, player.is_bot)
+		emit_signal("hand_updated", self.active_player, player.hand, false) #player.is_bot
 		
 func has_card_with_suit(player: int, suit: Card.Suit) -> bool:
 	for card in self.players[player].hand:
@@ -606,7 +613,7 @@ func play_card(card_id: int) -> void:
 			if card.suit == Card.Suit.JOKER:
 				self.jokers_played_count += 1
 				if self.jokers_played_count == 1:
-					self.change_second_joker_points()
+					self.update_second_joker()
 			
 			var yet_to_play = self.trick.count(null)
 			if yet_to_play > 0:
@@ -619,16 +626,17 @@ func play_card(card_id: int) -> void:
 			break
 	self.check_state()
 	
-func change_second_joker_points() -> void:
+func update_second_joker() -> void:
 	var found = false
 	for player in players:
 		for card in player.hand:
 			if card.suit == Card.Suit.JOKER:
 				found = true
 				card.points = 20
+				card.rank = 0.0
 				if self.view_exists:
-					emit_signal("card_points_updated", card)
-				print("Second joker points changed.")
+					emit_signal("joker_updated", card)
+				print("Second joker updated.")
 				break
 		if found:
 			break
