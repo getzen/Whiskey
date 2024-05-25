@@ -15,11 +15,10 @@ var discard_outlines: Array[Sprite2D]
 
 var trump_suit: Sprite2D
 var play_outline: Sprite2D
-var j = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	# Get view size
+	# The working size of the window is 1000 x 1000, independent of stretching.
 	self.center = Vector2(500.0, 500.0)
 	self.bid_panel = get_node("GUI/BidPanel") as Panel
 	self.bid_panel.visible = false
