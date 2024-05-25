@@ -7,6 +7,7 @@ var id: int
 var face_texture: Texture2D
 var back_texture: Texture2D
 var eligible: int = -1  # -1 = eligibility turned off
+var is_joker: bool # needed for proper points display
 
 # new/_init funcs are not automatically called when a scene is instantiated.
 func setup(card: Card) -> void:
@@ -16,6 +17,7 @@ func setup(card: Card) -> void:
 	back_texture = load("res://images/cards/back.png")
 	texture = face_texture # start face down
 	scale = Vector2(0.5, 0.5)
+	self.is_joker = card.suit == Card.Suit.JOKER
 	self.set_points(card.points)
 	self.set_eligibility(-1)
 	
@@ -54,7 +56,7 @@ func width() -> float:
 	return texture.get_width() * scale.x
 	
 func set_points(points: int) -> void:
-	if points == 0:
+	if points == 0 && !self.is_joker:
 		$PointsLabel.text = ""
 	else:
 		$PointsLabel.text = str(points) + " pts"

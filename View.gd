@@ -146,7 +146,7 @@ func _on_hand_updated(player: int, cards: Array[Card], is_bot: bool):
 		var card = cards[i] as Card
 		var card_node = self.find_card_node(card.id)
 		card_node.z_index = i
-		card_node.set_face_up(!is_bot)
+		card_node.set_face_up(card.face_up)
 		
 		var new_pos = self.hand_card_position(player, is_bot, i, cards.size())
 		self.tween_card_position(card_node, new_pos, 0.5)
@@ -251,3 +251,7 @@ func _on_points_updated(we_hand: int, they_hand: int, we_total: int, they_total:
 	$GUI/Score/HBoxContainer/TheyColumn/HandPoints.text = str(they_hand)
 	$GUI/Score/HBoxContainer/WeColumn/TotalPoints.text = str(we_total)
 	$GUI/Score/HBoxContainer/TheyColumn/TotalPoints.text = str(they_total)
+
+func _on_card_points_updated(card: Card) -> void:
+	var node = self.find_card_node(card.id)
+	node.set_points(card.points)

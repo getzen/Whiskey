@@ -45,6 +45,7 @@ signal get_play(player, is_bot, cards)
 signal trick_updated(cards)
 signal trick_awarded(player, cards)
 signal points_updated(we_hand, they_hand, we_total, they_total)
+signal card_points_updated(card)
 
 var player_count: int = 4
 var deck: Array[Card]
@@ -52,6 +53,7 @@ var nest: Array[Card]
 var players: Array[Player]
 var trick: Array[Card]
 var state: State = State.INIT
+var joker_ids: Array[int]
 
 # These are set in prepare_for_new_hand()
 var active_player: int
@@ -61,6 +63,7 @@ var cards_to_deal_total: int
 var maker: int # player number
 var pass_count: int # when equal to player_count, bid round is over
 var trump_suit:int # will be assigned a Card.Suit
+var jokers_played_count: int
 
 # These is set in prepare_for_new_trick()
 var lead_card: Card
@@ -361,7 +364,8 @@ func create_cards():
 			id += 1
 	# Jokers
 	for i in range(2):
-		self.create_card(id, Card.Suit.JOKER, 15.0, 20)
+		self.create_card(id, Card.Suit.JOKER, 15.0, 0)
+		self.joker_ids.push_back(id)
 		id += 1
 		
 	self.deck.shuffle()
@@ -381,7 +385,7 @@ func start():
 	self.check_state()
 		
 func prepare_for_new_hand() -> void:
-	# Gather cards to deck first, then...
+	# **** Gather cards to deck first, then...
 	self.deck.shuffle()
 	
 	self.active_player = 0
@@ -391,6 +395,15 @@ func prepare_for_new_hand() -> void:
 	self.maker = -1 # player number
 	self.pass_count = 0 # when equal to player_count, bid round is over
 	self.trump_suit = -1 # will be assigned a Card.Suit
+	self.jokers_played_count = 0
+	
+	# Restore joker points
+	for id in self.joker_ids:
+		var card = self.find_card_in_deck(id)
+		card.points = 0
+		if self.view_exists:
+			emit_signal("card_points_updated", card)
+		
 	
 	for player in self.players:
 		player.reset_for_new_hand()
@@ -400,8 +413,9 @@ func deal_card(p: int):
 	self.cards_to_deal -= 1
 	var card = self.deck.pop_back() as Card
 	var player = self.players[p]
-	if !player.is_bot:
-		card.face_up = true
+	#if !player.is_bot:
+		#card.face_up = true
+	card.face_up = true
 	player.hand.push_back(card)
 	
 	if self.view_exists:
@@ -585,6 +599,14 @@ func play_card(card_id: int) -> void:
 					if card.rank > self.lead_card.rank:
 						self.lead_card = card
 						self.trick_winner = p_id
+				elif card.suit == self.trump_suit:
+					self.lead_card = card
+					self.trick_winner = p_id
+			
+			if card.suit == Card.Suit.JOKER:
+				self.jokers_played_count += 1
+				if self.jokers_played_count == 1:
+					self.change_second_joker_points()
 			
 			var yet_to_play = self.trick.count(null)
 			if yet_to_play > 0:
@@ -596,7 +618,21 @@ func play_card(card_id: int) -> void:
 				
 			break
 	self.check_state()
-
+	
+func change_second_joker_points() -> void:
+	var found = false
+	for player in players:
+		for card in player.hand:
+			if card.suit == Card.Suit.JOKER:
+				found = true
+				card.points = 20
+				if self.view_exists:
+					emit_signal("card_points_updated", card)
+				print("Second joker points changed.")
+				break
+		if found:
+			break
+				
 func award_trick() -> void:
 	var player = self.players[self.trick_winner]
 	player.take_trick(self.trick)
