@@ -1,13 +1,15 @@
 class_name CardNode
 extends Sprite2D
 
-signal card_pressed(id)
+signal mouse_entered(id)
+signal mouse_exited(id)
 
 var id: int
 var face_texture: Texture2D
 var back_texture: Texture2D
 var eligible: int = -1  # -1 = eligibility turned off
 var is_joker: bool # needed for proper points display
+
 
 # new/_init funcs are not automatically called when a scene is instantiated.
 func setup(card: Card) -> void:
@@ -20,6 +22,11 @@ func setup(card: Card) -> void:
 	self.is_joker = card.suit == Card.Suit.JOKER
 	self.set_points(card.points)
 	self.set_eligibility(-1)
+	
+	# Set the Area2D click detection shape.
+	var shape = RectangleShape2D.new() as RectangleShape2D
+	shape.size = get_rect().size # get_rect() accounts for scale
+	$Area2D/CollisionShape2D.shape = shape
 	
 func tex_path_for(card: Card) -> String:
 	var path = 'res://images/cards/'
@@ -46,7 +53,7 @@ func tex_path_for(card: Card) -> String:
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
@@ -78,11 +85,8 @@ func set_face_up(up: bool):
 		texture = back_texture
 	$PointsLabel.visible = up
 
-# Pick up any events that haven't been captured by controls ('unhandled').
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		# Convert the event position to local, including rotation.
-		if get_rect().has_point(to_local(event.position)):
-			emit_signal("card_pressed", self.id)
-			# Stop propagation of event.
-			get_tree().get_root().set_input_as_handled()
+func _on_area_2d_mouse_entered() -> void:
+	emit_signal("mouse_entered", self.id)
+	
+func _on_area_2d_mouse_exited() -> void:
+	emit_signal("mouse_exited", self.id)

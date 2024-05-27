@@ -20,12 +20,14 @@ func _ready():
 	
 	self.view = get_node('View')
 	self.view.bid_made.connect(self._on_bid_made)
+	self.view.card_pressed.connect(self._on_card_pressed)
 	
 	# *** Since Game does not use:
 	# await get_tree().create_timer(0.1).timeout
 	# any longer, Game does not need to be a node nor added to scene tree.
 	var resource = preload("res://game.tscn")
 	self.game = resource.instantiate() as Game
+	
 	self.game.active_player_updated.connect(self.view._on_active_player_updated)
 	self.game.card_created.connect(self._on_card_created)
 	self.game.hand_updated.connect(self.view._on_hand_updated)
@@ -39,8 +41,6 @@ func _ready():
 	self.game.trick_awarded.connect(self._on_trick_awarded)
 	self.game.points_updated.connect(self.view._on_points_updated)
 	self.game.joker_updated.connect(self.view._on_joker_updated)
-	
-	self.add_child(self.game)
 	self.game.setup(4)
 	
 
@@ -75,12 +75,13 @@ func _process(delta):
 	
 func _on_card_created(card: Card):
 	var card_node = self.view.create_card_node(card)
-	card_node.card_pressed.connect(self._on_card_pressed)
+	#card_node.card_pressed.connect(self._on_card_pressed)
 	
 func _on_start_button_pressed() -> void:
 	$View/GUI/StartButton.visible = false
 	self.game.start()
 
+# signal sent by View
 func _on_card_pressed(id: int):
 	var card_node = self.view.find_card_node(id) as CardNode
 	if card_node.eligible == 1:

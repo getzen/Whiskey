@@ -1,6 +1,7 @@
 class_name View
 extends CanvasLayer
 
+signal card_pressed(id)
 signal bid_made(bid)
 
 var player_count = 4
@@ -15,6 +16,8 @@ var discard_outlines: Array[Sprite2D]
 
 var trump_suit: Sprite2D
 var play_outline: Sprite2D
+
+var mouse_over_card_ids: Dictionary
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -44,6 +47,21 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	pass
+	
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton && event.is_released():
+		if !self.mouse_over_card_ids.is_empty():
+			# find card with highest z index
+			var highest_z = -1000
+			var highest_id = 0
+			for id in self.mouse_over_card_ids:
+				var card_node_z = self.find_card_node(id).z_index
+				if card_node_z > highest_z:
+					highest_z = card_node_z
+					highest_id = id
+			emit_signal("card_pressed", highest_id)
+			get_tree().get_root().set_input_as_handled()
+
 	
 func find_card_node(id: int) -> CardNode:
 	return find_child(str(id), true, false) as CardNode
@@ -132,8 +150,18 @@ func create_card_node(card: Card) -> CardNode:
 	card_node.position = self.deck_position(card.id)
 	card_node.z_index = card.id
 	card_node.set_face_up(card.face_up)
+	card_node.mouse_entered.connect(self._on_mouse_entered_card)
+	card_node.mouse_exited.connect(self._on_mouse_exited_card)
 	$Cards.add_child(card_node)
 	return card_node
+
+# Sent by CardNode Area2D
+func _on_mouse_entered_card(id: int) -> void:
+	self.mouse_over_card_ids[id] = true
+	
+# Sent by CardNode Area2D
+func _on_mouse_exited_card(id: int) -> void:
+	self.mouse_over_card_ids.erase(id)
 	
 func _on_active_player_updated(player: int, game_state: Game.State):
 	$GUI/ActivePlayer.visible = true
