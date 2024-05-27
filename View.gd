@@ -17,6 +17,9 @@ var discard_outlines: Array[Sprite2D]
 var trump_suit: Sprite2D
 var play_outline: Sprite2D
 
+# Holds the id of the CardNodes that send mouse_entered events.
+# When a mouse_exited event occurs, the id is removed.
+# The keys are searched for the highest z_index when a mouse-click occurs.
 var mouse_over_card_ids: Dictionary
 
 # Called when the node enters the scene tree for the first time.
@@ -51,7 +54,7 @@ func _process(_delta):
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton && event.is_released():
 		if !self.mouse_over_card_ids.is_empty():
-			# find card with highest z index
+			# Find card with highest z index.
 			var highest_z = -1000
 			var highest_id = 0
 			for id in self.mouse_over_card_ids:

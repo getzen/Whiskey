@@ -74,8 +74,7 @@ func _process(delta):
 	self.game.process_actions(delta)
 	
 func _on_card_created(card: Card):
-	var card_node = self.view.create_card_node(card)
-	#card_node.card_pressed.connect(self._on_card_pressed)
+	var _node = self.view.create_card_node(card)
 	
 func _on_start_button_pressed() -> void:
 	$View/GUI/StartButton.visible = false
