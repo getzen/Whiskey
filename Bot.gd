@@ -35,10 +35,10 @@ func get_play(game: Game, player: int) -> Card:
 func get_play_monte_carlo(game: Game, p_id: int) -> Card:
 	var player = game.players[p_id] as Player
 	var best_card = null
+	var card_ids: Array[int]
+	var id_scores: Array[int]
 	
 	# Gather the player's card ids.
-	var card_ids: Array[int]
-
 	for card in player.hand:
 		if card.eligible == 1:
 			card_ids.append(card.id)
@@ -71,6 +71,12 @@ func get_play_monte_carlo(game: Game, p_id: int) -> Card:
 		# Play each eligible player card in turn
 		for id in card_ids:
 			game.play_card(id)
+			while game.state != Game.State.HAND_OVER:
+				while game.state != Game.State.AWARDING_TRICK:
+					game.mark_cards_eligible_for_play()
+					var cards = game.players[game.active_player].hand
+				game.prepare_for_new_trick()
+			# scoring...
 				
 	return best_card
 	

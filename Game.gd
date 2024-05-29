@@ -16,6 +16,7 @@ enum State {
 	PLAYING,
 	WAITING_FOR_PLAY,
 	AWARDING_TRICK,
+	HAND_OVER,
 	GAME_OVER
 }
 enum Action {
@@ -64,6 +65,7 @@ var maker: int # player number
 var pass_count: int # when equal to player_count, bid round is over
 var trump_suit:int # will be assigned a Card.Suit
 var jokers_played_count: int
+var tricks_played: int
 
 # These is set in prepare_for_new_trick()
 var lead_card: Card
@@ -168,8 +170,12 @@ func check_state():
 			else:
 				self.state = State.AWARDING_TRICK
 		State.AWARDING_TRICK:
-			# if hand is not over...
-			self.state = State.PREPARING_FOR_NEW_TRICK
+			if self.tricks_played < 9:
+				self.state = State.PREPARING_FOR_NEW_TRICK
+			else:
+				self.state = State.HAND_OVER
+		State.HAND_OVER:
+			print("hand over")
 		State.GAME_OVER:
 			pass
 			
@@ -397,6 +403,7 @@ func prepare_for_new_hand() -> void:
 	self.pass_count = 0 # when equal to player_count, bid round is over
 	self.trump_suit = -1 # will be assigned a Card.Suit
 	self.jokers_played_count = 0
+	self.tricks_played = 0
 	
 	# Restore jokers
 	for id in self.joker_ids:
@@ -540,7 +547,6 @@ func eligible_card_pressed(id) -> void:
 			var hand_card = self.find_card_in_hand(id, self.active_player)
 			if hand_card != null:
 				self.play_card(id)
-				self.check_state()
 				
 		_:
 			print("no dice")
@@ -648,7 +654,7 @@ func play_card(card_id: int) -> void:
 		emit_signal("hand_updated", p_id, player.hand, player.is_bot)
 		emit_signal("trick_updated", self.trick)
 		
-	#self.check_state()
+	self.check_state()
 	
 func update_second_joker() -> void:
 	var found = false
@@ -669,6 +675,7 @@ func award_trick() -> void:
 	var player = self.players[self.trick_winner]
 	player.take_trick(self.trick)
 	self.active_player = self.trick_winner
+	self.tricks_played += 1
 	if self.view_exists:
 		emit_signal("trick_awarded", self.trick_winner, self.trick)
 		var we_hand = self.players[0].hand_points + self.players[2].hand_points

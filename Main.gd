@@ -70,7 +70,6 @@ func _process(delta):
 				print("Bot plays: ", card)
 				self.bot_kind = BotKind.None
 				self.game.play_card(card.id)
-				self.game.check_state()
 				
 	self.game.process_actions(delta)
 	
