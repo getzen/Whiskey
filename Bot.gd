@@ -59,24 +59,39 @@ func get_play_monte_carlo(game: Game, p_id: int) -> Card:
 	var simulations := 1000
 	
 	for i in range(simulations):
-		card_stock.shuffle()
 		
-		# Assign the available cards to the other players' hands.
-		for p in range(game.player_count):
-			if p == p_id:
-				continue
-			for c in range(player.hand.size()):
-				game.players[p].hand.append(card_stock.pop_back())
 	
 		# Play each eligible player card in turn
 		for id in card_ids:
+			# make copy of game for this simulation...
+			
+			# gather the card_stock...
+			
+			card_stock.shuffle()
 			game.play_card(id)
+			# Assign the available cards to the other players' hands.
+			for p in range(game.player_count):
+				if p == p_id:
+					continue
+				for c in range(player.hand.size()):
+					game.players[p].hand.append(card_stock.pop_back())
+					
+			
+			
 			while game.state != Game.State.HAND_OVER:
 				while game.state != Game.State.AWARDING_TRICK:
 					game.mark_cards_eligible_for_play()
 					var cards = game.players[game.active_player].hand
+					for card in cards:
+						if card.eligible == 1:
+							game.play_card(card.id)
 				game.prepare_for_new_trick()
+			
 			# scoring...
+	
+	# Determine the highest scoring id...
+			
+			
 				
 	return best_card
 	
