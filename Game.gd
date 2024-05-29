@@ -540,6 +540,7 @@ func eligible_card_pressed(id) -> void:
 			var hand_card = self.find_card_in_hand(id, self.active_player)
 			if hand_card != null:
 				self.play_card(id)
+				self.check_state()
 				
 		_:
 			print("no dice")
@@ -647,7 +648,7 @@ func play_card(card_id: int) -> void:
 		emit_signal("hand_updated", p_id, player.hand, player.is_bot)
 		emit_signal("trick_updated", self.trick)
 		
-	self.check_state()
+	#self.check_state()
 	
 func update_second_joker() -> void:
 	var found = false

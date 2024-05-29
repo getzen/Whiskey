@@ -70,6 +70,7 @@ func _process(delta):
 				print("Bot plays: ", card)
 				self.bot_kind = BotKind.None
 				self.game.play_card(card.id)
+				self.game.check_state()
 				
 	self.game.process_actions(delta)
 	
@@ -125,7 +126,8 @@ func _on_get_play(player: int, is_bot: bool, eligible_cards: Array[Card]):
 		self.bot_kind = BotKind.Play
 		var game_copy = self.make_game_copy()
 		self.bot_thread = Thread.new()
-		self.bot_thread.start(bot.get_play.bind(game_copy, player))
+		#self.bot_thread.start(bot.get_play.bind(game_copy, player))
+		self.bot_thread.start(bot.get_play_monte_carlo.bind(game_copy, player))
 	else:
 		self.view.get_play(player, eligible_cards)
 		
