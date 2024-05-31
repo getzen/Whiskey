@@ -84,6 +84,32 @@ var view_exists: bool = true
 var pause_time := 0.0
 var actions: Array[Action] = []
 
+func make_copy() -> Game:
+	var resource = preload("res://game.tscn")
+	var copy = resource.instantiate() as Game
+	copy.view_exists = false
+	
+	copy.deck = self.deck.duplicate(true)
+	copy.nest = self.nest.duplicate(true)
+	copy.players = self.players.duplicate(true)
+	copy.trick = self.trick.duplicate(true)
+	
+	copy.active_player = self.active_player
+	copy.maker = self.maker
+	copy.trump_suit = self.trump_suit
+	copy.jokers_played_count = self.jokers_played_count
+	copy.tricks_played = self.tricks_played
+	
+	if self.lead_card != null:
+		var lead = self.lead_card
+		copy.lead_card = Card.new(lead.id, lead.suit, lead.rank, lead.points)
+	
+	copy.trick_winner = self.trick_winner
+	copy.winning_card = self.winning_card
+	
+	copy.hand_point_req = self.hand_point_req
+	return copy
+
 # new/_init funcs are not automatically called when a scene is instantiated.
 func setup(_player_count: int) -> void:
 	self.player_count = _player_count

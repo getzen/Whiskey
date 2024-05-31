@@ -41,6 +41,8 @@ func _ready():
 	self.game.trick_awarded.connect(self._on_trick_awarded)
 	self.game.points_updated.connect(self.view._on_points_updated)
 	self.game.joker_updated.connect(self.view._on_joker_updated)
+	self.game.last_trick_winner.connect(self.view._on_last_trick_winner)
+	self.game.hand_result.connect(self.view._on_hand_result)
 	self.game.setup(4)
 	
 
@@ -150,11 +152,16 @@ func make_game_copy() -> Game:
 	copy.active_player = self.game.active_player
 	copy.maker = self.game.maker
 	copy.trump_suit = self.game.trump_suit
+	copy.jokers_played_count = self.game.jokers_played_count
+	copy.tricks_played = self.game.tricks_played
 	
 	if self.game.lead_card != null:
 		var lead = self.game.lead_card
 		copy.lead_card = Card.new(lead.id, lead.suit, lead.rank, lead.points)
 	
 	copy.trick_winner = self.game.trick_winner
+	copy.winning_card = self.game.winning_card
+	
+	copy.hand_point_req = self.game.hand_point_req
 	
 	return copy

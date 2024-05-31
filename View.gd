@@ -286,3 +286,9 @@ func _on_points_updated(we_hand: int, they_hand: int, we_total: int, they_total:
 func _on_joker_updated(card: Card) -> void:
 	var node = self.find_card_node(card.id)
 	node.set_points(card.points)
+	
+func _on_last_trick_winner(winner: int, nest_pts: int, bonus: int) -> void:
+	print("last trick winner: " + str(winner) + " nest: " + str(nest_pts) + " bonus: " + str(bonus))
+
+func _on_hand_result(maker: int, success: bool):
+	print("maker succeeded: ", success)

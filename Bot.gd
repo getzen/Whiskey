@@ -33,6 +33,7 @@ func get_play(game: Game, player: int) -> Card:
 	return null
 	
 func get_play_monte_carlo(game: Game, p_id: int) -> Card:
+	print("bot: ", p_id)
 	var player = game.players[p_id] as Player
 	var best_card = null
 	var card_ids: Array[int]
@@ -59,39 +60,56 @@ func get_play_monte_carlo(game: Game, p_id: int) -> Card:
 	var simulations := 1000
 	
 	for i in range(simulations):
-		
-	
+		print("sim: ", i)
+		# make copy of game and card stock for this simulation...
+		var game_copy = game.make_copy()
+		var card_stock_copy = card_stock.duplicate(true)
+		card_stock_copy.shuffle()
+			
 		# Play each eligible player card in turn
 		for id in card_ids:
-			# make copy of game for this simulation...
-			
-			# gather the card_stock...
-			
-			card_stock.shuffle()
-			game.play_card(id)
+			print("id: ", id)
+			print("sim player: ", game_copy.active_player)
+			game_copy.play_card(id)
 			# Assign the available cards to the other players' hands.
-			for p in range(game.player_count):
+			for p in range(game_copy.player_count):
 				if p == p_id:
 					continue
+				game_copy.players[p].hand.clear()
 				for c in range(player.hand.size()):
-					game.players[p].hand.append(card_stock.pop_back())
+					game_copy.players[p].hand.append(card_stock_copy.pop_back())
 					
 			
 			
-			while game.state != Game.State.HAND_OVER:
-				while game.state != Game.State.AWARDING_TRICK:
-					game.mark_cards_eligible_for_play()
-					var cards = game.players[game.active_player].hand
-					for card in cards:
-						if card.eligible == 1:
-							game.play_card(card.id)
-				game.prepare_for_new_trick()
-			
-			# scoring...
+			while game_copy.state != Game.State.HAND_OVER:
+				while game_copy.state != Game.State.AWARDING_TRICK:
+					while game_copy.state == Game.State.WAITING_FOR_PLAY:
+						game_copy.mark_cards_eligible_for_play()
+						var cards = game_copy.players[game_copy.active_player].hand
+						for card in cards:
+							if card.eligible == 1:
+								print("player: ", game_copy.active_player)
+								game_copy.play_card(card.id)
+
+								game_copy.check_state()
+					game_copy.award_trick()
+					game_copy.check_state()
+				if game_copy.state == Game.State.PREPARING_FOR_NEW_TRICK:
+					game_copy.prepare_for_new_trick()
+	
+			# Award points
+			if player == 0 || player == 2:
+				id_scores.push_back(game_copy.we_points - game_copy.they_points)
+			else:
+				id_scores.push_back(game_copy.they_points - game_copy.we_points)
 	
 	# Determine the highest scoring id...
+	var highest_score = -1000
+	for i in range(id_scores.size()):
+		if id_scores[i] > highest_score:
+			highest_score = id_scores[i]
+			best_card = player.hand[i]
 			
-			
-				
+	print("highest score: ", highest_score)
 	return best_card
 	
