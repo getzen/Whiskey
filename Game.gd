@@ -614,7 +614,9 @@ func award_trick() -> void:
 		emit_signal("points_updated", we_hand, they_hand, self.we_points, self.they_points)
 		
 func award_last_trick_bonus() -> void:
-	var nest_points = 0 # TODO
+	var nest_points = 0
+	for card: Card in self.nest:
+		nest_points += card.points
 	var bonus = 10
 	
 	self.players[self.trick_winner].hand_points += nest_points + bonus
