@@ -30,6 +30,8 @@ enum Action {
 	PREPARE_FOR_NEW_TRICK,
 	GET_PLAY,
 	AWARD_TRICK,
+	AWARD_LAST_TRICK_BONUS,
+	TALLY_HAND_SCORE,
 	PAUSE_TINY, 
 	PAUSE
 }
@@ -47,6 +49,8 @@ signal trick_updated(cards)
 signal trick_awarded(player, cards)
 signal points_updated(we_hand, they_hand, we_total, they_total)
 signal joker_updated(card)
+signal last_trick_winner(trick_winner, nest_points, bonus)
+signal hand_result(maker, made_bid)
 
 var player_count: int = 4
 var deck: Array[Card]
@@ -74,6 +78,7 @@ var trick_winner: int # player
 
 var we_points: int
 var they_points: int
+var hand_point_req := 80
 
 var view_exists: bool = true
 var pause_time := 0.0
@@ -216,6 +221,8 @@ func add_actions():
 			pass
 		State.AWARDING_TRICK:
 			new_actions = [Action.PAUSE, Action.AWARD_TRICK]
+		State.HAND_OVER:
+			new_actions = [Action.AWARD_LAST_TRICK_BONUS, Action.TALLY_HAND_SCORE]
 		State.GAME_OVER:
 			pass
 			
@@ -223,46 +230,7 @@ func add_actions():
 		for a in new_actions:
 			self.actions.push_back(a)
 		self.actions.push_back(Action.CHECK_STATE)
-	
-#func create_script_old() -> Array[Action]:
-	#var actions: Array[Action] = []
-	#match self.state:
-		#State.INIT:
-			#pass
-		#State.STARTING:
-			#pass
-		#State.PREPARING_FOR_NEW_HAND:
-			#actions.push_back(Action.PREPARE_FOR_NEW_HAND)
-		#State.DEALING:
-			#for i in range(self.cards_to_deal):
-				#actions.push_back(Action.DEAL_CARD)
-				#actions.push_back(Action.PAUSE_TINY)
-		#State.DEALING_TO_NEST:
-			#actions.push_back(Action.PAUSE)
-			#actions.push_back(Action.DEAL_TO_NEST)
-		#State.BIDDING:
-			#actions.push_back(Action.GET_BID)
-		#State.WAITING_FOR_BID:
-			#pass
-		#State.MOVING_NEST_TO_HAND:
-			#actions.push_back(Action.MOVE_NEST_TO_HAND)
-		#State.DISCARDING:
-			#actions.push_back(Action.GET_DISCARDS)
-		#State.WAITING_FOR_DISCARDS:
-			#pass
-		#State.PREPARING_FOR_NEW_TRICK:
-			#actions.push_back(Action.PREPARE_FOR_NEW_TRICK)
-		#State.PLAYING:
-			#actions.push_back(Action.GET_PLAY)
-		#State.WAITING_FOR_PLAY:
-			#pass
-		#State.AWARDING_TRICK:
-			#actions.push_back(Action.PAUSE)
-			#actions.push_back(Action.AWARD_TRICK)
-		#State.GAME_OVER:
-			#pass
-			#
-	#return actions
+		
 
 func process_actions(time_delta: float):
 	if self.actions.is_empty():
@@ -303,6 +271,10 @@ func process_actions(time_delta: float):
 			emit_signal("get_play", self.active_player, is_bot, cards)
 		Action.AWARD_TRICK:
 			self.award_trick()
+		Action.AWARD_LAST_TRICK_BONUS:
+			self.award_last_trick_bonus()
+		Action.TALLY_HAND_SCORE:
+			self.tally_hand_score()
 		Action.PAUSE_TINY:
 			if self.view_exists:
 				self.pause_time = 0.1
@@ -310,47 +282,6 @@ func process_actions(time_delta: float):
 			if self.view_exists:
 				self.pause_time = 1.0
 					
-#func run_script_old(script: Array[Action]):
-	#for action in script:
-		#match action:
-			#Action.PREPARE_FOR_NEW_HAND:
-				#self.prepare_for_new_hand()
-			#Action.DEAL_CARD:
-				#self.deal_card(self.active_player)
-				#self.advance_player()
-			#Action.DEAL_TO_NEST:
-				#self.deal_to_nest(2)
-			#Action.GET_BID:
-				#print("Get bid...")
-				#emit_signal("get_bid", self.active_player, self.player_is_bot())
-			#Action.MOVE_NEST_TO_HAND:
-				#self.move_nest_to_hand()
-			#Action.GET_DISCARDS:
-				#print("Get discards...")
-				#var is_bot = self.players[self.maker].is_bot
-				#self.mark_cards_eligible_for_discard()
-				#var cards = self.players[self.maker].hand
-				#emit_signal("get_discards", self.maker, is_bot, cards)
-			#Action.PREPARE_FOR_NEW_TRICK:
-				#self.prepare_for_new_trick()
-			#Action.GET_PLAY:
-				#print("Get play...")
-				#var is_bot = self.players[self.active_player].is_bot
-				#self.mark_cards_eligible_for_play()
-				#var cards = self.players[self.active_player].hand
-				#emit_signal("get_play", self.active_player, is_bot, cards)
-			#Action.AWARD_TRICK:
-				#print("Action.AWARD_TRICK")
-				#self.award_trick()
-			#Action.PAUSE_TINY:
-				#if self.view_exists:
-					#await get_tree().create_timer(0.1).timeout
-			#Action.PAUSE:
-				#if self.view_exists:
-					#print("Action.PAUSE")
-					#await get_tree().create_timer(2.0).timeout
-					#
-					#print("Action.PAUSE END")
 
 func create_cards():
 	var id: int = 0
@@ -680,4 +611,41 @@ func award_trick() -> void:
 		emit_signal("trick_awarded", self.trick_winner, self.trick)
 		var we_hand = self.players[0].hand_points + self.players[2].hand_points
 		var they_hand = self.players[1].hand_points + self.players[3].hand_points
+		emit_signal("points_updated", we_hand, they_hand, self.we_points, self.they_points)
+		
+func award_last_trick_bonus() -> void:
+	var nest_points = 0 # TODO
+	var bonus = 10
+	
+	self.players[self.trick_winner].hand_points += nest_points + bonus
+	
+	var we_hand = self.players[0].hand_points + self.players[2].hand_points
+	var they_hand = self.players[1].hand_points + self.players[3].hand_points
+	
+	if self.view_exists:
+		emit_signal("last_trick_winner", self.trick_winner, nest_points, bonus)
+		emit_signal("points_updated", we_hand, they_hand, self.we_points, self.they_points)
+		pass
+		
+func tally_hand_score() -> void:
+	var we_hand = self.players[0].hand_points + self.players[2].hand_points
+	var they_hand = self.players[1].hand_points + self.players[3].hand_points
+	
+	var made_bid = false
+	
+	if self.maker == 0 || self.maker == 2:
+		# Add nest points to score...
+		if we_hand >= self.hand_point_req:
+			self.we_points += we_hand
+			made_bid = true
+		self.they_points += they_hand
+		
+	if self.maker == 1 || self.maker == 3:
+		if they_hand >= self.hand_point_req:
+			self.they_points += they_hand
+			made_bid = true
+		self.we_points += we_hand
+
+	if self.view_exists:
+		emit_signal("hand_result", self.maker, made_bid)
 		emit_signal("points_updated", we_hand, they_hand, self.we_points, self.they_points)
