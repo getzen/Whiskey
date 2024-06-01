@@ -194,19 +194,22 @@ func check_state():
 			self.state = State.PLAYING
 		State.PLAYING:
 			self.state = State.WAITING_FOR_PLAY
+			
 		State.WAITING_FOR_PLAY:
-			var yet_to_play = self.trick.count(null)
-			if yet_to_play > 0:
-				self.state = State.PLAYING
-			else:
+			if self.trick_completed():
 				self.state = State.AWARDING_TRICK
-		State.AWARDING_TRICK:
-			if self.tricks_played < 9:
-				self.state = State.PREPARING_FOR_NEW_TRICK
 			else:
+				self.state = State.PLAYING
+				
+		State.AWARDING_TRICK:
+			if self.hand_completed():
 				self.state = State.HAND_OVER
+			else:
+				self.state = State.PREPARING_FOR_NEW_TRICK
+				
 		State.HAND_OVER:
 			print("hand over")
+			
 		State.GAME_OVER:
 			pass
 			
@@ -627,7 +630,10 @@ func update_second_joker() -> void:
 				break
 		if found:
 			break
-				
+			
+func trick_completed() -> bool:
+	return self.trick.count(null) == 0
+
 func award_trick() -> void:
 	var player = self.players[self.trick_winner]
 	player.take_trick(self.trick)
@@ -638,7 +644,10 @@ func award_trick() -> void:
 		var we_hand = self.players[0].hand_points + self.players[2].hand_points
 		var they_hand = self.players[1].hand_points + self.players[3].hand_points
 		emit_signal("points_updated", we_hand, they_hand, self.we_points, self.they_points)
-		
+
+func hand_completed() -> bool:
+	return self.tricks_played == 9
+	
 func award_last_trick_bonus() -> void:
 	var nest_points = 0
 	for card: Card in self.nest:
