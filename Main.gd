@@ -67,11 +67,11 @@ func _process(delta):
 				self.game.make_discards(discards)
 		BotKind.Play:
 			if !self.bot_thread.is_alive():
-				var card = self.bot_thread.wait_to_finish()
+				var card_id = self.bot_thread.wait_to_finish()
 				self.bot_thread = null
-				print("Bot plays: ", card)
+				print("Bot plays id: ", card_id)
 				self.bot_kind = BotKind.None
-				self.game.play_card(card.id)
+				self.game.play_card(card_id)
 				self.game.check_state()
 				
 	self.game.process_actions(delta)

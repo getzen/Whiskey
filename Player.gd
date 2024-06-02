@@ -11,8 +11,10 @@ var hand_points: int
 func make_copy() -> Player:
 	var p = Player.new()
 	p.is_bot = self.is_bot
-	p.hand += self.hand.duplicate(true)
-	p.tricks += self.tricks.duplicate(true)
+	for card in self.hand:
+		p.hand.push_back(card.make_copy())
+	for card in self.tricks:
+		p.tricks.push_back(card.make_copy())
 	p.hand_points = self.hand_points
 	return p 
 

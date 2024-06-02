@@ -32,19 +32,19 @@ func get_play(game: Game, player: int) -> Card:
 			return card
 	return null
 	
-func get_play_monte_carlo(game: Game, p_id: int) -> Card:
+func get_play_monte_carlo(game: Game, p_id: int) -> int:
 	print("bot: ", p_id)
 	var monte_player = game.players[p_id] as Player
-	var best_card: Card = null
+	var best_id := -1
 	var playable_ids: Array[int] = []
 	
 	# Gather the player's card ids.
 	for card in monte_player.hand:
 		if card.eligible == 1:
 			playable_ids.append(card.id)
-			best_card = card
+			best_id = card.id
 	if playable_ids.size() == 1:
-		return best_card
+		return best_id
 		
 	# Gather the cards that might playable by other players.
 	var hidden_cards: Array[Card] = []
@@ -97,18 +97,19 @@ func get_play_monte_carlo(game: Game, p_id: int) -> Card:
 				monte_game.prepare_for_new_trick()
 					
 			# Award points
+			monte_game.tally_hand_score()
 			if p_id == 0 || p_id == 2:
 				id_scores[playable_idx] += (monte_game.we_points - monte_game.they_points)
 			else:
 				id_scores[playable_idx] += (monte_game.they_points - monte_game.we_points)
 	
 	# Determine the highest scoring id...
-	var highest_score = -1000
+	var highest_score = -10000000
 	for i in range(id_scores.size()):
 		if id_scores[i] > highest_score:
 			highest_score = id_scores[i]
-			best_card = monte_player.hand[i]
+			best_id = playable_ids[i]
 			
 	print("highest score: ", highest_score)
-	return best_card
+	return best_id
 	

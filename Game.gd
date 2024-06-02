@@ -72,15 +72,15 @@ var jokers_played_count: int
 var tricks_played: int
 
 # These is set in prepare_for_new_trick()
-var lead_card: Card
-var winning_card: Card
+var lead_card: Card = null
+var winning_card: Card = null
 var trick_winner: int # player
 
-var we_points: int
-var they_points: int
+var we_points := 0
+var they_points := 0
 var hand_point_req := 80
 
-var view_exists: bool = true
+var view_exists := true
 var pause_time := 0.0
 var actions: Array[Action] = []
 
@@ -474,7 +474,7 @@ func mark_cards_eligible_for_play() -> void:
 	
 	for card: Card in player.hand:
 		# First card of trick?
-		if self.lead_card == null:
+		if self.lead_card == null || !has_lead_suit:
 			card.eligible = 1
 			continue
 		
@@ -490,11 +490,6 @@ func mark_cards_eligible_for_play() -> void:
 		
 		# If Joker is lead, trump suited cards are eligible.
 		if self.lead_card.suit == Card.Suit.JOKER && card.suit == self.trump_suit:
-			card.eligible = 1
-			continue
-		
-		# Must play card matching lead suit if possible, and this card doesn't.
-		if !has_lead_suit:
 			card.eligible = 1
 			continue
 		
@@ -627,9 +622,9 @@ func play_card(card_id: int) -> void:
 		emit_signal("trick_updated", self.trick)
 	
 func update_second_joker() -> void:
-	var found = false
-	for player in players:
-		for card in player.hand:
+	var found := false
+	for player: Player in self.players:
+		for card: Card in player.hand:
 			if card.suit == Card.Suit.JOKER:
 				found = true
 				card.points = 20
