@@ -18,3 +18,8 @@ func _init(_id: int, _suit: Suit, _rank: float, _points: int) -> void:
 	self.points = _points
 	self.face_up = false
 	self.eligible = -1
+	
+func make_copy() -> Card:
+	var c = Card.new(self.id, self.suit, self.rank, self.points)
+	c.eligible = self.eligible
+	return c

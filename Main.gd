@@ -72,6 +72,7 @@ func _process(delta):
 				print("Bot plays: ", card)
 				self.bot_kind = BotKind.None
 				self.game.play_card(card.id)
+				self.game.check_state()
 				
 	self.game.process_actions(delta)
 	
@@ -94,7 +95,7 @@ func _on_get_bid(player: int, is_bot: bool):
 	if is_bot:
 		var bot := Bot.new()
 		self.bot_kind = BotKind.Bid
-		var game_copy =self.make_game_copy()
+		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
 		self.bot_thread.start(bot.get_bid.bind(game_copy, player))
 	else:
@@ -109,7 +110,7 @@ func _on_get_discards(player: int, is_bot: bool, eligible_cards: Array[Card]):
 	if is_bot:
 		var bot := Bot.new()	
 		self.bot_kind = BotKind.Discard	
-		var game_copy =self.make_game_copy()
+		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
 		self.bot_thread.start(bot.get_discards.bind(game_copy, player))
 	else:
@@ -125,7 +126,7 @@ func _on_get_play(player: int, is_bot: bool, eligible_cards: Array[Card]):
 	if is_bot:
 		var bot := Bot.new()
 		self.bot_kind = BotKind.Play
-		var game_copy = self.make_game_copy()
+		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
 		#self.bot_thread.start(bot.get_play.bind(game_copy, player))
 		self.bot_thread.start(bot.get_play_monte_carlo.bind(game_copy, player))
@@ -134,34 +135,8 @@ func _on_get_play(player: int, is_bot: bool, eligible_cards: Array[Card]):
 		
 func _on_trick_updated(cards: Array[Card]) -> void:
 	self.view.update_trick(cards)
-	#self.do_play_loop()
 	
 func _on_trick_awarded(player: int, cards: Array[Card]) -> void:
 	self.view.update_awarded_trick(player, cards)
 	
-func make_game_copy() -> Game:
-	var resource = preload("res://game.tscn")
-	var copy = resource.instantiate() as Game
-	copy.view_exists = false
-	
-	copy.deck = self.game.deck.duplicate(true)
-	copy.nest = self.game.nest.duplicate(true)
-	copy.players = self.game.players.duplicate(true)
-	copy.trick = self.game.trick.duplicate(true)
-	
-	copy.active_player = self.game.active_player
-	copy.maker = self.game.maker
-	copy.trump_suit = self.game.trump_suit
-	copy.jokers_played_count = self.game.jokers_played_count
-	copy.tricks_played = self.game.tricks_played
-	
-	if self.game.lead_card != null:
-		var lead = self.game.lead_card
-		copy.lead_card = Card.new(lead.id, lead.suit, lead.rank, lead.points)
-	
-	copy.trick_winner = self.game.trick_winner
-	copy.winning_card = self.game.winning_card
-	
-	copy.hand_point_req = self.game.hand_point_req
-	
-	return copy
+
