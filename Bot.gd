@@ -60,6 +60,7 @@ func get_play_monte_carlo(game: Game, p_id: int) -> int:
 		id_scores.push_back(0)
 	
 	var simulations := 1000
+	var start_time = Time.get_ticks_msec()
 	
 	for i in range(simulations):
 		# make copy of game and card stock for this simulation...
@@ -109,7 +110,9 @@ func get_play_monte_carlo(game: Game, p_id: int) -> int:
 		if id_scores[i] > highest_score:
 			highest_score = id_scores[i]
 			best_id = playable_ids[i]
-			
+	
+	var time_delta = Time.get_ticks_msec() - start_time
+	print("time in msec: ", time_delta)
 	print("highest score: ", highest_score)
 	return best_id
 	

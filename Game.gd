@@ -572,52 +572,52 @@ func play_card(card_id: int) -> void:
 	var p_id = self.active_player
 	var player = self.players[p_id]
 	
+	var card: Card = null
 	for i in range(player.hand.size()):
-		var card = player.hand[i]
-		if card.id != card_id:
-			continue
-		
-		player.hand.remove_at(i)
-		self.trick[self.active_player] = card
-		
-		# If this is the first joker played, change the second one.
-		if card.suit == Card.Suit.JOKER:
-			self.jokers_played_count += 1
-			if self.jokers_played_count == 1:
-				self.update_second_joker()
-		
-		# first card played in trick
-		if self.lead_card == null:
-			self.lead_card = card
-			self.winning_card = card
-			self.trick_winner = p_id
+		if player.hand[i].id == card_id:
+			card = player.hand[i]
+			player.hand.remove_at(i)
 			break
-		
-		# playing a trump card
-		if card.suit == self.trump_suit || card.suit == Card.Suit.JOKER:
-			# winning card is also trump
-			if self.winning_card.suit == self.trump_suit || self.winning_card.suit == Card.Suit.JOKER:
-				if card.rank > self.winning_card.rank:
-					self.winning_card = card
-					self.trick_winner = p_id
-			# first trump card played
-			else:
+	
+	self.trick[self.active_player] = card
+	
+	# If this is the first joker played, change the second one.
+	if card.suit == Card.Suit.JOKER:
+		self.jokers_played_count += 1
+		if self.jokers_played_count == 1:
+			self.update_second_joker()
+	
+	# first card played in trick
+	if self.lead_card == null:
+		self.lead_card = card
+		self.winning_card = card
+		self.trick_winner = p_id
+	
+	# playing a trump card
+	elif card.suit == self.trump_suit || card.suit == Card.Suit.JOKER:
+		# winning card is also trump
+		if self.winning_card.suit == self.trump_suit || self.winning_card.suit == Card.Suit.JOKER:
+			if card.rank > self.winning_card.rank:
 				self.winning_card = card
 				self.trick_winner = p_id
-			break
-			
-		# card suit is not trump
-		if card.suit == self.winning_card.suit && card.rank > self.winning_card.rank:
+		# first trump card played
+		else:
 			self.winning_card = card
 			self.trick_winner = p_id
 		
-		break # end card comparison
+	# card suit is not trump
+	elif card.suit == self.winning_card.suit && card.rank > self.winning_card.rank:
+		self.winning_card = card
+		self.trick_winner = p_id
+	
+	# end card comparison
 	
 	var yet_to_play = self.trick.count(null)
 	if yet_to_play > 0:
 		self.advance_player()
 			
 	if self.view_exists:
+		card.face_up = true
 		emit_signal("hand_updated", p_id, player.hand, player.is_bot)
 		emit_signal("trick_updated", self.trick)
 	

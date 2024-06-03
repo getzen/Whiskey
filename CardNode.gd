@@ -50,14 +50,6 @@ func tex_path_for(card: Card) -> String:
 		
 	path += '.png'
 	return path
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta):
-	pass
 	
 func width() -> float:
 	return texture.get_width() * scale.x

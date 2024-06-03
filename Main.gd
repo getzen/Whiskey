@@ -91,7 +91,6 @@ func _on_card_pressed(id: int):
 		
 	
 func _on_get_bid(player: int, is_bot: bool):
-	print("main.on_get_bid")
 	if is_bot:
 		var bot := Bot.new()
 		self.bot_kind = BotKind.Bid
@@ -106,7 +105,6 @@ func _on_bid_made(bid: Card.Suit) -> void:
 	#self.do_play_loop()
 	
 func _on_get_discards(player: int, is_bot: bool, eligible_cards: Array[Card]):
-	print("main._on_get_discards")
 	if is_bot:
 		var bot := Bot.new()	
 		self.bot_kind = BotKind.Discard	
@@ -122,7 +120,6 @@ func _on_done_button_pressed() -> void:
 	#self.do_play_loop()
 	
 func _on_get_play(player: int, is_bot: bool, eligible_cards: Array[Card]):
-	print("main._on_get_play")
 	if is_bot:
 		var bot := Bot.new()
 		self.bot_kind = BotKind.Play
