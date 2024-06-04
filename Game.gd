@@ -552,7 +552,6 @@ func move_nest_card_to_hand(id: int, _player: int) -> void:
 func discards_done() -> void:
 	for i in range(self.nest.size()):
 		var card = self.nest[i]
-		card.eligible = -1
 		card.face_up = false
 		
 	if self.view_exists:

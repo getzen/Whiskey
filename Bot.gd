@@ -78,8 +78,8 @@ func get_play_monte_carlo(game: Game, p_id: int, eligible_ids: Array[int]) -> in
 			while !monte_game.hand_completed():
 				while !monte_game.trick_completed():
 					var other_ids = monte_game.get_eligible_play_cards() as Array[int]
-					var rnd_idx = rng.randi_range(0, other_ids.size())
-					monte_game.play(other_ids[rnd_idx])
+					var rnd_idx = rng.randi_range(0, other_ids.size()-1)
+					monte_game.play_card(other_ids[rnd_idx])
 				monte_game.award_trick()
 				monte_game.prepare_for_new_trick()
 					
