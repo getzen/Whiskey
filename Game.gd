@@ -39,12 +39,13 @@ enum Action {
 signal card_created(card)
 signal active_player_updated(player, state)
 signal hand_updated(player, cards, is_bot)
+signal card_eligibility_updated(eligible_ids)
 signal nest_exchange_updated(cards)
 signal get_bid(player, is_bot)
 signal trump_suit_updated(suit)
-signal get_discards(player, is_bot)
+signal get_discards(player, is_bot, eligible_ids)
 signal nest_aside_updated(cards)
-signal get_play(player, is_bot, cards)
+signal get_play(player, is_bot, eligible_ids)
 signal trick_updated(cards)
 signal trick_awarded(player, cards)
 signal points_updated(we_hand, they_hand, we_total, they_total)
@@ -298,16 +299,18 @@ func process_actions(time_delta: float):
 			self.move_nest_to_hand()
 		Action.GET_DISCARDS:
 			var is_bot = self.players[self.maker].is_bot
-			self.mark_cards_eligible_for_discard()
-			var cards = self.players[self.maker].hand
-			emit_signal("get_discards", self.maker, is_bot, cards)
+			var eligible_ids = self.get_eligible_discards()
+			if self.view_exists:
+				emit_signal("card_eligibility_updated", eligible_ids)
+			emit_signal("get_discards", self.maker, is_bot, eligible_ids)
 		Action.PREPARE_FOR_NEW_TRICK:
 			self.prepare_for_new_trick()
 		Action.GET_PLAY:
 			var is_bot = self.players[self.active_player].is_bot
-			self.mark_cards_eligible_for_play()
-			var cards = self.players[self.active_player].hand
-			emit_signal("get_play", self.active_player, is_bot, cards)
+			var eligible_ids = self.get_eligible_play_cards()
+			if self.view_exists:
+				emit_signal("card_eligibility_updated", eligible_ids)
+			emit_signal("get_play", self.active_player, is_bot, eligible_ids)
 		Action.AWARD_TRICK:
 			self.award_trick()
 		Action.AWARD_LAST_TRICK_BONUS:
@@ -442,20 +445,18 @@ func turn_off_eligibility(_player: int) -> void:
 	if self.view_exists:
 		emit_signal("hand updated", _player, hand, player.is_bot)
 
-func mark_cards_eligible_for_discard() -> void:
+func get_eligible_discards() -> Array[int]:
 	var player = self.players[self.maker]
-	
+	var eligible_ids: Array[int] = []
 	for card: Card in player.hand:
 		match card.suit:
 			Card.Suit.JOKER:
-				card.eligible = 0
+				pass
 			_:
-				card.eligible = 1
-				
-	if self.view_exists:
-		emit_signal("hand_updated", self.maker, player.hand, player.is_bot)
+				eligible_ids.push_back(card.id)	
+	return eligible_ids
 		
-func mark_cards_eligible_for_play() -> void:
+func get_eligible_play_cards() -> Array[int]:
 	var player = self.players[self.active_player]
 	
 	var has_lead_suit = false
@@ -472,31 +473,32 @@ func mark_cards_eligible_for_play() -> void:
 				has_lead_suit = true
 				break
 	
+	var eligible_ids: Array[int] = []
+	
 	for card: Card in player.hand:
 		# First card of trick?
 		if self.lead_card == null || !has_lead_suit:
-			card.eligible = 1
+			eligible_ids.push_back(card.id)
 			continue
 		
 		# Cards matching lead suit are always eligible.
 		if card.suit == self.lead_card.suit:
-			card.eligible = 1
+			eligible_ids.push_back(card.id)
 			continue
 			
 		# Lead card is trump and this card is Joker?
 		if self.lead_card.suit == self.trump_suit && card.suit == Card.Suit.JOKER:
-			card.eligible = 1
+			eligible_ids.push_back(card.id)
 			continue
 		
 		# If Joker is lead, trump suited cards are eligible.
 		if self.lead_card.suit == Card.Suit.JOKER && card.suit == self.trump_suit:
-			card.eligible = 1
+			eligible_ids.push_back(card.id)
 			continue
-		
-		card.eligible = 0
-		
-	if self.view_exists:
-		emit_signal("hand_updated", self.active_player, player.hand, false) #player.is_bot
+	
+	return eligible_ids
+	#if self.view_exists:
+		#emit_signal("hand_updated", self.active_player, player.hand, false) #player.is_bot
 
 func eligible_card_pressed(id) -> void:
 	match self.state:

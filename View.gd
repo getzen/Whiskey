@@ -183,6 +183,14 @@ func _on_hand_updated(player: int, cards: Array[Card], is_bot: bool):
 		self.tween_card_position(card_node, new_pos, 0.5)
 		self.tween_card_rotation(card_node, self.player_rotation(player), 0.2)
 		
+func _on_card_eligibility_updated(eligible_ids: Array[int]):
+	var card_nodes = $Cards.get_children() as Array[CardNode]
+	for node: CardNode in card_nodes:
+		if eligible_ids.find(node.id) == -1:
+			node.set_eligibility(0)
+		else:
+			node.set_eligibility(1)
+		
 func _on_nest_exchange_updated(cards: Array[Card]):
 	for i in cards.size():
 		var card = cards[i]
@@ -226,28 +234,21 @@ func _on_trump_suit_updated(suit: Card.Suit) -> void:
 			self.trump_suit.visible = true
 			self.trump_suit.set_suit(suit)
 	
-func get_discards(eligible_cards):
+func get_discards():
 	self.discard_panel.visible = true
 	self.done_button.disabled = true
 	
 	for outline in self.discard_outlines:
 		outline.visible = true
-	for i in eligible_cards.size():
-		var card = eligible_cards[i]
-		var card_node = self.find_card_node(card.id)
-		card_node.set_eligibility(card.eligible)
 	
 func discards_done():
 	self.discard_panel.visible = false
 	for outline in self.discard_outlines:
 		outline.visible = false
+	self._on_card_eligibility_updated([])
 		
-func get_play(player: int, eligible_cards: Array[Card]) -> void:
+func get_play(player: int) -> void:
 	self.update_play_outline(true, player)
-	for i in eligible_cards.size():
-		var card = eligible_cards[i]
-		var card_node = self.find_card_node(card.id)
-		card_node.set_eligibility(card.eligible)
 		
 func update_play_outline(_visible: bool, player: int):
 	self.play_outline.visible = _visible

@@ -31,6 +31,7 @@ func _ready():
 	self.game.active_player_updated.connect(self.view._on_active_player_updated)
 	self.game.card_created.connect(self._on_card_created)
 	self.game.hand_updated.connect(self.view._on_hand_updated)
+	self.game.card_eligibility_updated.connect(self.view._on_card_eligibility_updated)
 	self.game.nest_exchange_updated.connect(self.view._on_nest_exchange_updated)
 	self.game.get_bid.connect(self._on_get_bid)
 	self.game.trump_suit_updated.connect(self.view._on_trump_suit_updated)
@@ -104,31 +105,30 @@ func _on_bid_made(bid: Card.Suit) -> void:
 	self.game.make_bid(bid)
 	#self.do_play_loop()
 	
-func _on_get_discards(player: int, is_bot: bool, eligible_cards: Array[Card]):
+func _on_get_discards(player: int, is_bot: bool, eligible_ids: Array[int]):
 	if is_bot:
 		var bot := Bot.new()	
 		self.bot_kind = BotKind.Discard	
 		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
-		self.bot_thread.start(bot.get_discards.bind(game_copy, player))
+		self.bot_thread.start(bot.get_discards.bind(game_copy, player, eligible_ids))
 	else:
-		self.view.get_discards(eligible_cards)
+		self.view.get_discards()
 
 func _on_done_button_pressed() -> void:
 	self.view.discards_done()
 	self.game.discards_done()
-	#self.do_play_loop()
 	
-func _on_get_play(player: int, is_bot: bool, eligible_cards: Array[Card]):
+func _on_get_play(player: int, is_bot: bool, eligible_ids: Array[int]):
 	if is_bot:
 		var bot := Bot.new()
 		self.bot_kind = BotKind.Play
 		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
-		#self.bot_thread.start(bot.get_play.bind(game_copy, player))
-		self.bot_thread.start(bot.get_play_monte_carlo.bind(game_copy, player))
+		#self.bot_thread.start(bot.get_play.bind(game_copy, player, eligible_ids))
+		self.bot_thread.start(bot.get_play_monte_carlo.bind(game_copy, player, eligible_ids))
 	else:
-		self.view.get_play(player, eligible_cards)
+		self.view.get_play(player)
 		
 func _on_trick_updated(cards: Array[Card]) -> void:
 	self.view.update_trick(cards)
