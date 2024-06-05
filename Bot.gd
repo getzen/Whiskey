@@ -91,14 +91,14 @@ func get_play_monte_carlo(game: Game, p_id: int, eligible_ids: Array[int]) -> in
 				id_scores[idx] += (monte_game.they_points - monte_game.we_points)
 	
 	# Determine the highest scoring id...
-	var highest_score = -10000000
+	var highest_score := -10000000
 	for i in range(id_scores.size()):
 		if id_scores[i] > highest_score:
 			highest_score = id_scores[i]
 			best_id = eligible_ids[i]
 	
 	var time_delta = Time.get_ticks_msec() - start_time
-	print("time in msec: ", time_delta)
+	print("time per eligible id in msec: ", time_delta / eligible_ids.size())
 	print("highest score: ", highest_score)
 	return best_id
 	
