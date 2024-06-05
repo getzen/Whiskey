@@ -18,10 +18,8 @@ var bot_thread: Thread
 func _ready():
 	print("Main.ready")
 	
-	var card_new = CardNew.Create(0, 10.5) as CardNew
-	card_new.Points = 42
-	var suit = card_new.Suit
-	print("suit: ", suit)
+	var card_new = CardNew.Create(0, 1, 10.5, 20) as CardNew
+	print("suit: ", card_new.Suit)
 	
 	self.view = get_node('View')
 	self.view.bid_made.connect(self._on_bid_made)
