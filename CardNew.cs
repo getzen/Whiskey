@@ -16,7 +16,7 @@ using System;
 
 
 // NONE is used when bidding to pass.
-public enum SuitNew {CLUB, DIAMOND, HEART, SPADE, JOKER, NONE}
+public enum SuitNew {Club, Diamond, Heart, Spade, Joker, None}
 
 
 [GlobalClass] // Required to access this class from GDScript.
@@ -26,7 +26,7 @@ public partial class CardNew : GodotObject // Required, or a subclass of it.
 
 	public int Id { get; set;}
 	private SuitNew _suit;
-	public int Suit => (int)_suit;
+	public int Suit => (int)_suit; // Cast the enum to its int.
 	public double Rank { get; set; } // double is equivalent to GDScript's float.
 	public int Points { get; set; }
 	public bool FaceUp { get; set; }
@@ -35,7 +35,7 @@ public partial class CardNew : GodotObject // Required, or a subclass of it.
 	{
 		var card = new CardNew();
 		card.Id = id;
-		card._suit = (SuitNew)suit; // cast the int to the enum
+		card._suit = (SuitNew)suit; // Cast the int to the enum.
 		card.Rank = rank;
 		card.Points = points;
 		card.FaceUp = false;
