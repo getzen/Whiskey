@@ -48,7 +48,7 @@ func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> int:
 	for _i in range(eligible_ids.size()):
 		id_scores.push_back(0)
 	
-	var simulations := 100
+	var simulations := 500
 	var start_time = Time.get_ticks_msec()
 	var rng := RandomNumberGenerator.new()
 
@@ -65,17 +65,18 @@ func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> int:
 				continue
 			var player = sim_game.players[p] as Player
 			var hand = player.hand as Array[Card]
-			var size = hand.size() as int
+			var orig_hand_size = hand.size()
 			hand.clear()
-			for c in range(size):
-				while true:
-					var card = hidden_cards_copy.pop_back() as Card
-					if player.is_out_of_suit(card.suit):
-						# Player has been shown to be out of this suit, so skip this card.
-						hidden_cards_copy.push_front(card)
-					else:
+			
+			var hidden_idx = hidden_cards_copy.size() as int
+			while hand.size() < orig_hand_size:
+				hidden_idx -= 1
+				if hidden_idx < 0:
+					print("OUT OF HIDDEN CARDS TO ASSIGN!")
+				else:
+					var card = hidden_cards_copy[hidden_idx] as Card
+					if !player.is_out_of_suit(card.suit):
 						hand.push_back(card)
-						break
 					
 		# Play each eligible player card in turn
 		for idx in range(eligible_ids.size()):
