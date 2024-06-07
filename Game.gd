@@ -574,6 +574,9 @@ func prepare_for_new_trick() -> void:
 	self.trick.clear()
 	for _i in self.player_count:
 		self.trick.push_back(null)
+		
+func is_trump(suit: Card.Suit) -> bool:
+	return suit == self.trump_suit || suit == Card.Suit.JOKER
 
 func play_card(card_id: int) -> void:
 	# Need a copy since self.active_player changes below before signals are emitted.
@@ -594,6 +597,18 @@ func play_card(card_id: int) -> void:
 		self.jokers_played_count += 1
 		if self.jokers_played_count == 1:
 			self.update_second_joker()
+			
+	# For Bot use: determine if the card played signals the player is out of the lead suit.
+	var out_of_lead_suit := true
+	if self.lead_card != null:
+		if self.is_trump(card.suit) && self.is_trump(self.lead_card.suit):
+			out_of_lead_suit = false
+		elif card.suit == self.lead_card.suit:
+			out_of_lead_suit = false
+		if out_of_lead_suit:
+			player.out_of_suits.push_back(self.lead_card.suit)
+			#if self.view_exists:
+				#print("player: " + str(p_id) + " is out of suit: " + str(self.lead_card.suit))
 	
 	# first card played in trick
 	if self.lead_card == null:

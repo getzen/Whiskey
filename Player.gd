@@ -6,6 +6,7 @@ var is_bot: bool
 var hand: Array[Card] = []
 var tricks: Array[Card] = []
 var hand_points: int
+var out_of_suits: Array[Card.Suit] = []
 
 func make_copy() -> Player:
 	var p = Player.new()
@@ -21,6 +22,7 @@ func reset_for_new_hand():
 	self.hand.clear()
 	self.tricks.clear()
 	self.hand_points = 0
+	self.out_of_suits.clear()
 	
 func take_trick(cards: Array[Card]) -> void:
 	for card in cards:
