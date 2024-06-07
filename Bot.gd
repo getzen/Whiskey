@@ -9,7 +9,7 @@ func get_bid(_game: Game, _p_id: int) -> Card.Suit:
 		_j = i
 	return Card.Suit.NONE
 	
-func get_discards(game: Game, p_id: int, eligible_ids: Array[int]) -> Array[Card]:
+func get_discards(game: Game, p_id: int, _eligible_ids: Array[int]) -> Array[Card]:
 	print("thinking...")
 	var _hand = game.players[p_id].hand
 
@@ -19,16 +19,16 @@ func get_discards(game: Game, p_id: int, eligible_ids: Array[int]) -> Array[Card
 	return []
 
 
-func get_play(game: Game, _p_id: int, eligible_ids: Array[int]) -> int:
+func get_play(_game: Game, _p_id: int, _eligible_ids: Array[int]) -> int:
 	print("thinking...")
 	var _j = 0
 	for i in range(100_000_000):
 		_j = i
-	return eligible_ids[0]
+	return _eligible_ids[0]
 	
 func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> int:
 	print("bot: ", p_id)
-	var monte_player = game.players[p_id] as Player
+	#var monte_player = game.players[p_id] as Player
 	var eligible_ids = id_dict[1] as Array[int]
 	if eligible_ids.size() == 1:
 		return eligible_ids[0]

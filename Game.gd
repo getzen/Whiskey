@@ -369,6 +369,9 @@ func prepare_for_new_hand() -> void:
 	self.deck.shuffle()
 	
 	self.active_player = 0
+	if self.view_exists:
+		emit_signal("active_player_updated", self.active_player, self.state)
+		
 	self.cards_dealt = 0
 	self.cards_to_deal = 20
 	self.cards_to_deal_total = 36
@@ -647,8 +650,10 @@ func award_trick() -> void:
 	var player = self.players[self.trick_winner]
 	player.take_trick(self.trick)
 	self.active_player = self.trick_winner
+	
 	self.tricks_played += 1
 	if self.view_exists:
+		emit_signal("active_player_updated", self.active_player, self.state)
 		emit_signal("trick_awarded", self.trick_winner, self.trick)
 		var we_hand = self.players[0].hand_points + self.players[2].hand_points
 		var they_hand = self.players[1].hand_points + self.players[3].hand_points

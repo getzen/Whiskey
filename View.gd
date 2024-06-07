@@ -169,9 +169,14 @@ func _on_mouse_exited_card(id: int) -> void:
 func _on_active_player_updated(player: int, game_state: Game.State):
 	$GUI/ActivePlayer.visible = true
 	$GUI/ActivePlayer.position = self.active_player_position(player)
-	if game_state == Game.State.WAITING_FOR_PLAY:
-		self.update_play_outline(true, player)
-	
+	match game_state as Game.State:
+		Game.State.WAITING_FOR_PLAY:
+			self.update_play_outline(true, player)
+		Game.State.AWARDING_TRICK:
+			self.update_play_outline(true, player)
+		_:
+			pass
+			
 func _on_hand_updated(player: int, cards: Array[Card], is_bot: bool):
 	for i in cards.size():
 		var card = cards[i] as Card
