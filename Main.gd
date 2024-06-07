@@ -105,13 +105,13 @@ func _on_bid_made(bid: Card.Suit) -> void:
 	self.game.make_bid(bid)
 	#self.do_play_loop()
 	
-func _on_get_discards(player: int, is_bot: bool, eligible_ids: Array[int]):
+func _on_get_discards(player: int, is_bot: bool, id_dict: Dictionary):
 	if is_bot:
 		var bot := Bot.new()	
 		self.bot_kind = BotKind.Discard	
 		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
-		self.bot_thread.start(bot.get_discards.bind(game_copy, player, eligible_ids))
+		self.bot_thread.start(bot.get_discards.bind(game_copy, player, id_dict[1]))
 	else:
 		self.view.get_discards()
 
@@ -119,14 +119,14 @@ func _on_done_button_pressed() -> void:
 	self.view.discards_done()
 	self.game.discards_done()
 	
-func _on_get_play(player: int, is_bot: bool, eligible_ids: Array[int]):
+func _on_get_play(player: int, is_bot: bool, id_dict: Dictionary):
 	if is_bot:
 		var bot := Bot.new()
 		self.bot_kind = BotKind.Play
 		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
-		#self.bot_thread.start(bot.get_play.bind(game_copy, player, eligible_ids))
-		self.bot_thread.start(bot.get_play_monte_carlo.bind(game_copy, player, eligible_ids))
+		#self.bot_thread.start(bot.get_play.bind(game_copy, player, id_dict))
+		self.bot_thread.start(bot.get_play_monte_carlo.bind(game_copy, player, id_dict))
 	else:
 		self.view.get_play(player)
 		

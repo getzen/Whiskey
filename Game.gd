@@ -299,18 +299,18 @@ func process_actions(time_delta: float):
 			self.move_nest_to_hand()
 		Action.GET_DISCARDS:
 			var is_bot = self.players[self.maker].is_bot
-			var eligible_ids = self.get_eligible_discards()
+			var id_dict = self.get_eligible_discards()
 			if self.view_exists:
-				emit_signal("card_eligibility_updated", eligible_ids)
-			emit_signal("get_discards", self.maker, is_bot, eligible_ids)
+				emit_signal("card_eligibility_updated", id_dict)
+			emit_signal("get_discards", self.maker, is_bot, id_dict)
 		Action.PREPARE_FOR_NEW_TRICK:
 			self.prepare_for_new_trick()
 		Action.GET_PLAY:
 			var is_bot = self.players[self.active_player].is_bot
-			var eligible_ids = self.get_eligible_play_cards()
+			var id_dict = self.get_eligible_play_cards()
 			if self.view_exists:
-				emit_signal("card_eligibility_updated", eligible_ids)
-			emit_signal("get_play", self.active_player, is_bot, eligible_ids)
+				emit_signal("card_eligibility_updated", id_dict)
+			emit_signal("get_play", self.active_player, is_bot, id_dict)
 		Action.AWARD_TRICK:
 			self.award_trick()
 		Action.AWARD_LAST_TRICK_BONUS:
@@ -445,18 +445,19 @@ func turn_off_eligibility(_player: int) -> void:
 	if self.view_exists:
 		emit_signal("hand updated", _player, hand, player.is_bot)
 
-func get_eligible_discards() -> Array[int]:
+func get_eligible_discards() -> Dictionary:
 	var player = self.players[self.maker]
 	var eligible_ids: Array[int] = []
+	var ineligible_ids: Array[int] = []
 	for card: Card in player.hand:
 		match card.suit:
 			Card.Suit.JOKER:
-				pass
+				ineligible_ids.push_back(card.id)
 			_:
 				eligible_ids.push_back(card.id)	
-	return eligible_ids
+	return {1 : eligible_ids, 0: ineligible_ids}
 		
-func get_eligible_play_cards() -> Array[int]:
+func get_eligible_play_cards() -> Dictionary:
 	var player = self.players[self.active_player]
 	
 	var has_lead_suit = false
@@ -474,6 +475,7 @@ func get_eligible_play_cards() -> Array[int]:
 				break
 	
 	var eligible_ids: Array[int] = []
+	var ineligible_ids: Array[int] = []
 	
 	for card: Card in player.hand:
 		# First card of trick?
@@ -495,8 +497,10 @@ func get_eligible_play_cards() -> Array[int]:
 		if self.lead_card.suit == Card.Suit.JOKER && card.suit == self.trump_suit:
 			eligible_ids.push_back(card.id)
 			continue
+			
+		ineligible_ids.push_back(card.id)
 	
-	return eligible_ids
+	return {1 : eligible_ids, 0: ineligible_ids}
 	#if self.view_exists:
 		#emit_signal("hand_updated", self.active_player, player.hand, false) #player.is_bot
 

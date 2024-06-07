@@ -26,10 +26,10 @@ func get_play(game: Game, _p_id: int, eligible_ids: Array[int]) -> int:
 		_j = i
 	return eligible_ids[0]
 	
-func get_play_monte_carlo(game: Game, p_id: int, eligible_ids: Array[int]) -> int:
+func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> int:
 	print("bot: ", p_id)
 	var monte_player = game.players[p_id] as Player
-
+	var eligible_ids = id_dict[1] as Array[int]
 	if eligible_ids.size() == 1:
 		return eligible_ids[0]
 		
@@ -71,14 +71,15 @@ func get_play_monte_carlo(game: Game, p_id: int, eligible_ids: Array[int]) -> in
 					
 		# Play each eligible player card in turn
 		for idx in range(eligible_ids.size()):
-			var id = eligible_ids[idx]
-			var monte_game = sim_game.make_copy()
+			var id = eligible_ids[idx] as int
+			var monte_game = sim_game.make_copy() as Game
 			monte_game.play_card(id)
 			
 			while !monte_game.hand_completed():
 				while !monte_game.trick_completed():
-					var other_ids = monte_game.get_eligible_play_cards() as Array[int]
-					var rnd_idx = rng.randi_range(0, other_ids.size()-1)
+					var other_dict = monte_game.get_eligible_play_cards() as Dictionary
+					var other_ids = other_dict[1] as Array[int]
+					var rnd_idx = rng.randi_range(0, other_ids.size()-1) as int
 					monte_game.play_card(other_ids[rnd_idx])
 				monte_game.award_trick()
 				monte_game.prepare_for_new_trick()

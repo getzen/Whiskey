@@ -183,13 +183,23 @@ func _on_hand_updated(player: int, cards: Array[Card], is_bot: bool):
 		self.tween_card_position(card_node, new_pos, 0.5)
 		self.tween_card_rotation(card_node, self.player_rotation(player), 0.2)
 		
-func _on_card_eligibility_updated(eligible_ids: Array[int]):
+func _on_card_eligibility_updated(id_dict: Dictionary):
 	var card_nodes = $Cards.get_children() as Array[CardNode]
+	if id_dict.is_empty():
+		for node: CardNode in card_nodes:
+			node.set_eligibility(-1)
+		return
+		
 	for node: CardNode in card_nodes:
-		if eligible_ids.find(node.id) == -1:
+		# Eligible ids are in the array with the key: 1.
+		if id_dict[1].find(node.id) != -1:
+			node.set_eligibility(1)
+		# Ineligible ids are in the array with the key: 0.
+		elif id_dict[0].find(node.id) != -1:
 			node.set_eligibility(0)
 		else:
-			node.set_eligibility(1)
+			# -1 means ineligible, but don't dim card node.
+			node.set_eligibility(-1)
 		
 func _on_nest_exchange_updated(cards: Array[Card]):
 	for i in cards.size():
@@ -245,7 +255,7 @@ func discards_done():
 	self.discard_panel.visible = false
 	for outline in self.discard_outlines:
 		outline.visible = false
-	self._on_card_eligibility_updated([])
+	self._on_card_eligibility_updated({})
 		
 func get_play(player: int) -> void:
 	self.update_play_outline(true, player)
