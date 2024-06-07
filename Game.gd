@@ -606,7 +606,7 @@ func play_card(card_id: int) -> void:
 		elif card.suit == self.lead_card.suit:
 			out_of_lead_suit = false
 		if out_of_lead_suit:
-			player.out_of_suits.push_back(self.lead_card.suit)
+			player.set_out_of_suit(self.lead_card.suit)
 			#if self.view_exists:
 				#print("player: " + str(p_id) + " is out of suit: " + str(self.lead_card.suit))
 	
@@ -617,9 +617,9 @@ func play_card(card_id: int) -> void:
 		self.trick_winner = p_id
 	
 	# playing a trump card
-	elif card.suit == self.trump_suit || card.suit == Card.Suit.JOKER:
+	elif self.is_trump(card.suit):
 		# winning card is also trump
-		if self.winning_card.suit == self.trump_suit || self.winning_card.suit == Card.Suit.JOKER:
+		if self.is_trump(self.winning_card.suit):
 			if card.rank > self.winning_card.rank:
 				self.winning_card = card
 				self.trick_winner = p_id
