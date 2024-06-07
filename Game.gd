@@ -606,7 +606,7 @@ func play_card(card_id: int) -> void:
 		elif card.suit == self.lead_card.suit:
 			out_of_lead_suit = false
 		if out_of_lead_suit:
-			player.set_out_of_suit(self.lead_card.suit)s
+			player.set_out_of_suit(self.lead_card.suit)
 	
 	# first card played in trick
 	if self.lead_card == null:
