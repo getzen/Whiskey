@@ -6,7 +6,6 @@ func get_bid(game: Game, p_id: int) -> Card.Suit:
 	print("thinking...")
 	var hand = game.players[p_id].hand
 	var suits := [Card.Suit.CLUB, Card.Suit.DIAMOND, Card.Suit.HEART, Card.Suit.SPADE]
-	var suit_scores = [0, 0, 0, 0]
 	
 	var best_score = 0
 	var best_suit: Card.Suit = Card.Suit.NONE
@@ -17,13 +16,16 @@ func get_bid(game: Game, p_id: int) -> Card.Suit:
 			best_score = score
 			best_suit = suits[idx]
 			
-	print("P:" + str(p_id) + " best suit: " + str(best_suit) + ", score: " + str(best_score))
+
 	
 	best_score += score_jokers(hand)
 	# See if score exceeds threshold needed, depending on hand size.
 	#              0  1  2  3  4   5   6   7   8   9
-	var pts_req = [0, 0, 0, 0, 0, 30, 34, 38, 42, 48]
-	if best_score >= pts_req[hand.size()]:
+	var pts_reqs = [0, 0, 0, 0, 0, 28, 29, 30, 31, 32]
+	var pts_req = pts_reqs[hand.size()]
+	print("P:" + str(p_id) + " best suit: " + str(best_suit) + ", score: " + str(best_score) + "/" + str(pts_req) )
+		
+	if best_score >= pts_req:
 		return best_suit
 	return Card.Suit.NONE
 
@@ -51,14 +53,13 @@ func score_jokers(hand: Array[Card]) -> int:
 		_:
 			return 0
 		
-func get_discards(game: Game, p_id: int, _eligible_ids: Array[int]) -> Array[Card]:
+func get_discards(game: Game, p_id: int, eligible_ids: Array[int]) -> Array[int]:
 	print("thinking...")
-	var _hand = game.players[p_id].hand
 
-	var _j = 0
-	for i in range(100_000_000):
-		_j = i
-	return []
+	var discards: Array[int] = []
+	discards.push_back(eligible_ids.pop_back())
+	discards.push_back(eligible_ids.pop_back())
+	return discards
 
 
 func get_play(_game: Game, _p_id: int, _eligible_ids: Array[int]) -> int:
@@ -90,7 +91,7 @@ func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> int:
 	for _i in range(eligible_ids.size()):
 		id_scores.push_back(0)
 	
-	var simulations := 500
+	var simulations := 600
 	var start_time = Time.get_ticks_msec()
 	var rng := RandomNumberGenerator.new()
 

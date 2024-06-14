@@ -65,7 +65,9 @@ func _process(delta):
 				self.bot_thread = null
 				print("Bot discards: ", discards)
 				self.bot_kind = BotKind.None
-				self.game.make_discards(discards)
+				for id in discards:
+					self.game.move_card_to_nest(id)
+				self.game.discards_done()
 		BotKind.Play:
 			if !self.bot_thread.is_alive():
 				var card_id = self.bot_thread.wait_to_finish()
