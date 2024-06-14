@@ -249,6 +249,8 @@ func add_actions():
 			pass
 		State.MOVING_NEST_TO_HAND:
 			new_actions = [Action.MOVE_NEST_TO_HAND]
+			if self.player_is_bot():
+				new_actions.push_back(Action.PAUSE)
 		State.DISCARDING:
 			new_actions = [Action.GET_DISCARDS]
 		State.WAITING_FOR_DISCARDS:
