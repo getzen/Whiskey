@@ -85,7 +85,7 @@ func active_player_position(player: int) -> Vector2:
 	return pos
 	
 func deck_position(card_idx: int) -> Vector2:
-	var pos = Vector2(100.0, 120.0)
+	var pos = Vector2(120.0, 140.0)
 	pos.x += card_idx * 2
 	return pos
 	
@@ -308,3 +308,11 @@ func _on_last_trick_winner(winner: int, nest_pts: int, bonus: int) -> void:
 
 func _on_hand_result(_maker: int, success: bool):
 	print("maker succeeded: ", success)
+
+func _on_rules_close_button_pressed() -> void:
+	$Rules.visible = false
+	$RulesButton.disabled = false
+
+func _on_rules_button_pressed() -> void:
+	$RulesButton.disabled = true
+	$Rules.visible = true

@@ -290,6 +290,96 @@ horizontal_alignment = 2
 
 [node name="Cards" type="CanvasLayer" parent="View"]
 
+[node name="Rules" type="CanvasLayer" parent="View"]
+visible = false
+offset = Vector2(50, 76)
+transform = Transform2D(1, 0, 0, 1, 50, 76)
+
+[node name="Border" type="ColorRect" parent="View/Rules"]
+offset_right = 900.0
+offset_bottom = 850.0
+color = Color(0.737193, 0.737193, 0.737193, 1)
+
+[node name="Background" type="ColorRect" parent="View/Rules"]
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 895.0
+offset_bottom = 845.0
+color = Color(0.379811, 0.379811, 0.37981, 1)
+
+[node name="Text" type="RichTextLabel" parent="View/Rules"]
+offset_left = 24.0
+offset_top = 29.0
+offset_right = 881.0
+offset_bottom = 775.0
+text = "Whiskey is a four-player, trick-taking card game. Players sitting opposite each other are partners. Whiskey has its roots in games like Rook, Deux Cent, and Euchre. It's is played with a standard deck of cards, plus two Jokers, and with the 2s, 3s, 4s, and 6s removed, for 38 cards total.
+
+If you are not famliar with \"tricks\" and \"trump suit,\" do an internet search for \"whist rules\" to get you acquainted.
+
+Players try to capture tricks containing point cards:
+5 = 5 pts			10 = 10 pts		Ace = 15 pts		Second Joker = 20 pts
+
+# Jokers
+The Jokers are always members of the trump suit. The first Joker played in a hand is the highest trump, ranking above the Ace, but worth 0 points. The second Joker played is the lowest trump, ranking below the 5, but worth 20 points.
+
+# Dealing & Calling Trump
+The Dealer shuffles the cards, deals 5 cards to each player, and places the deck in the center of the table.
+
+There is then a “pass or call trump” pause. Starting to the Dealer’s left, each player has a chance to pass or call out the trump suit for the hand.
+
+If all four players pass, each player, starting to the Dealer’s left, picks up a single card from the deck and adds it to their hands. The process then repeats with another pass or call-suit pause, another single card drawn, and so on, until each player has 9 cards.
+
+The first player to call out trump becomes the Maker, the suit named is the trump suit for the hand, and no more pauses are needed. The cards are simply picked up one by one until each player has 9.
+
+# Nest
+The two remaining cards are the “nest.” The Maker adds the two nest cards to his hand, then discards any two cards – except Jokers – face down back to the nest, which is then set aside. The Maker and his partner are known as the Makers. The other team are the Defenders.
+
+# No-Trump Hand
+If no player opts to call a suit and become the Maker after all 9 cards are dealt, then a “no-trump” hand is played. No suits or cards are trump. The Jokers become Diamonds for the hand. The first Joker played is the highest Diamond (ranking above the Ace and still worth 0 points), the second played is the lowest Diamond (ranking below the 5 and still worth 20 points).
+
+# Card Play
+For the first trick, the player to the Maker’s left leads a card (or the Dealer’s left for a no-trump hand) and play continues clockwise. Players must play a card with the lead suit if possible. Otherwise, they may play any card from their hand.
+
+The winner of the trick is determined by the highest trump card played or if no trump card was played, the highest card of the lead suit. If both Jokers are played to the same trick, the first one takes trick.
+
+# Taking the Trick
+The trick winner places any point cards taken face up in a fan in front of him or his partner. This includes the second Joker played, since it’s worth 20 points. All other cards played to tricks are placed face down in a single heap.
+
+The trick winner then leads the next trick.
+
+# Last Trick
+The winner of the last trick gets 10 bonus points plus the value of any point cards in the nest. (When playing a no-trump hand, there may be one or two Jokers in the nest. A single Joker is worth 20 points. A second Joker in the nest is worth 0 points.)
+
+# Scoring
+Both teams add up the points cards they won, plus the last trick bonus and nest point cards. There are 150 points available in a hand.
+
+For a regular hand (not a no-trump hand):
+When													Makers Get				Defenders Get
+Makers score 90 or more				Points taken				Points taken
+Makers score less than 90					0							Points taken
+
+For a no-trump hand, both teams score the points they took.
+
+# Winning the Game
+The first team to 300 points wins the game.
+
+
+"
+
+[node name="CloseButton" type="Button" parent="View/Rules"]
+offset_left = 430.0
+offset_top = 792.0
+offset_right = 480.0
+offset_bottom = 823.0
+text = "Close"
+
+[node name="RulesButton" type="Button" parent="View"]
+offset_left = 13.0
+offset_top = 11.0
+offset_right = 63.0
+offset_bottom = 42.0
+text = "Rules"
+
 [connection signal="pressed" from="View/GUI/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="View/GUI/BidPanel/ClubButton" to="View" method="_on_bid_button_pressed" binds= [0]]
 [connection signal="pressed" from="View/GUI/BidPanel/DiamondButton" to="View" method="_on_bid_button_pressed" binds= [1]]
@@ -297,3 +387,5 @@ horizontal_alignment = 2
 [connection signal="pressed" from="View/GUI/BidPanel/SpadeButton" to="View" method="_on_bid_button_pressed" binds= [3]]
 [connection signal="pressed" from="View/GUI/BidPanel/PassButton" to="View" method="_on_bid_button_pressed" binds= [5]]
 [connection signal="pressed" from="View/GUI/DiscardPanel/DoneButton" to="." method="_on_done_button_pressed"]
+[connection signal="pressed" from="View/Rules/CloseButton" to="View" method="_on_rules_close_button_pressed"]
+[connection signal="pressed" from="View/RulesButton" to="View" method="_on_rules_button_pressed"]
