@@ -2,13 +2,55 @@ class_name Bot
 extends Node
 
 
-func get_bid(_game: Game, _p_id: int) -> Card.Suit:
+func get_bid(game: Game, p_id: int) -> Card.Suit:
 	print("thinking...")
-	var _j = 0
-	for i in range(30_000_000):
-		_j = i
-	return Card.Suit.NONE
+	var hand = game.players[p_id].hand
+	var suits := [Card.Suit.CLUB, Card.Suit.DIAMOND, Card.Suit.HEART, Card.Suit.SPADE]
+	var suit_scores = [0, 0, 0, 0]
 	
+	var best_score = 0
+	var best_suit: Card.Suit = Card.Suit.NONE
+	for idx in range(4):
+		var score = score_suit(hand, suits[idx])
+		#print("P:" + str(p_id) + " suit: " + str(suits[idx]) + ", score: " + str(score))
+		if score > best_score:
+			best_score = score
+			best_suit = suits[idx]
+			
+	print("P:" + str(p_id) + " best suit: " + str(best_suit) + ", score: " + str(best_score))
+	
+	best_score += score_jokers(hand)
+	# See if score exceeds threshold needed, depending on hand size.
+	#              0  1  2  3  4   5   6   7   8   9
+	var pts_req = [0, 0, 0, 0, 0, 30, 34, 38, 42, 48]
+	if best_score >= pts_req[hand.size()]:
+		return best_suit
+	return Card.Suit.NONE
+
+# Score the values of the given suit. Trump suit not considered.
+func score_suit(hand: Array[Card], suit: Card.Suit) -> int:
+	var score := 0
+	#              5  6  7  8  9 10  J  Q   K   A
+	var values := [3, 0, 4, 5, 6, 7, 8, 9, 10, 15]
+	for card in hand:
+		if card.suit == suit:
+			var idx := card.rank as int - 5
+			score += values[idx]
+	return score
+	
+func score_jokers(hand: Array[Card]) -> int:
+	var count := 0
+	for card in hand:
+		if card.suit == Card.Suit.JOKER:
+			count += 1
+	match count:
+		1:
+			return 10
+		2:
+			return 20
+		_:
+			return 0
+		
 func get_discards(game: Game, p_id: int, _eligible_ids: Array[int]) -> Array[Card]:
 	print("thinking...")
 	var _hand = game.players[p_id].hand
