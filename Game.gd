@@ -26,6 +26,7 @@ enum Action {
 	DEAL_CARD, 
 	DEAL_TO_NEST, 
 	GET_BID,
+	HIDE_BIDS,
 	MOVE_NEST_TO_HAND,
 	GET_DISCARDS,
 	PREPARE_FOR_NEW_TRICK,
@@ -44,6 +45,7 @@ signal card_eligibility_updated(eligible_ids)
 signal nest_exchange_updated(cards)
 signal get_bid(player, is_bot)
 signal display_bid(player, bid, is_bot)
+signal hide_bids
 signal trump_suit_updated(suit)
 signal get_discards(player, is_bot, eligible_ids)
 signal nest_aside_updated(cards)
@@ -198,24 +200,6 @@ func check_state():
 					self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
 				else:
 					self.state = State.MOVING_NEST_TO_HAND
-		#State.HANDLING_BID:
-			#if self.maker == -1:
-				#if self.pass_count == self.player_count:
-					#self.pass_count = 0
-					#if self.cards_dealt < self.cards_to_deal_total:
-						#self.state = State.DEALING
-						#self.cards_to_deal = 4
-					#else:
-						#print("no trump...")
-				#else:
-					#self.state = State.BIDDING
-			#else: # done with bidding
-				#if self.cards_dealt < self.cards_to_deal_total:
-					## Finish dealing the rest of the cards.
-					#self.state = State.DEALING
-					#self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
-				#else:
-					#self.state = State.MOVING_NEST_TO_HAND
 		State.MOVING_NEST_TO_HAND:
 			self.state = State.DISCARDING
 		State.DISCARDING:
@@ -259,6 +243,7 @@ func add_actions():
 		State.PREPARING_FOR_NEW_HAND:
 			new_actions = [Action.PREPARE_FOR_NEW_HAND]
 		State.DEALING:
+			new_actions = [Action.HIDE_BIDS]
 			for i in range(self.cards_to_deal):
 				new_actions.push_back(Action.DEAL_CARD)
 				new_actions.push_back(Action.PAUSE_TINY)
@@ -269,7 +254,7 @@ func add_actions():
 		State.WAITING_FOR_BID:
 			pass
 		State.MOVING_NEST_TO_HAND:
-			new_actions = [Action.MOVE_NEST_TO_HAND]
+			new_actions = [Action.HIDE_BIDS, Action.MOVE_NEST_TO_HAND]
 			if self.player_is_bot():
 				new_actions.push_back(Action.PAUSE)
 		State.DISCARDING:
@@ -318,6 +303,8 @@ func process_actions(time_delta: float):
 			self.deal_to_nest(2)
 		Action.GET_BID:
 			emit_signal("get_bid", self.active_player, self.player_is_bot())
+		Action.HIDE_BIDS:
+			emit_signal("hide_bids")
 		Action.MOVE_NEST_TO_HAND:
 			self.move_nest_to_hand()
 		Action.GET_DISCARDS:
@@ -438,7 +425,7 @@ func deal_to_nest(count: int):
 		emit_signal("nest_exchange_updated", self.nest)
 
 func make_bid(bid: Card.Suit):
-	print("player: " + str(self.active_player) + " bid made: ", bid)
+	#print("player: " + str(self.active_player) + " bid made: ", bid)
 	match bid:
 		Card.Suit.NONE: # pass
 			self.pass_count += 1
@@ -450,6 +437,8 @@ func make_bid(bid: Card.Suit):
 			
 	if self.view_exists:
 		emit_signal("display_bid", self.active_player, bid, self.player_is_bot())
+		#if self.player_is_bot():
+		self.actions.push_back(Action.PAUSE)
 	self.check_state()
 			
 func move_nest_to_hand():

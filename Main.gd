@@ -35,6 +35,7 @@ func _ready():
 	self.game.nest_exchange_updated.connect(self.view._on_nest_exchange_updated)
 	self.game.get_bid.connect(self._on_get_bid)
 	self.game.display_bid.connect(self.view._on_display_bid)
+	self.game.hide_bids.connect(self.view._on_hide_bids)
 	self.game.trump_suit_updated.connect(self.view._on_trump_suit_updated)
 	self.game.get_discards.connect(self._on_get_discards)
 	self.game.nest_aside_updated.connect(self.view._on_nest_aside_updated)
