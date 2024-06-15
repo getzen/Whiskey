@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://dwdg2y2trh8v6"]
+
+[ext_resource type="Texture2D" uid="uid://dm16hv1hvfce6" path="res://images/bid_diamond.png" id="1_potwo"]
+
+[node name="BidDiamond" type="Sprite2D"]
+visible = false
+position = Vector2(277, 592)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_potwo")

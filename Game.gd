@@ -8,7 +8,8 @@ enum State {
 	DEALING,
 	DEALING_TO_NEST, 
 	BIDDING, 
-	WAITING_FOR_BID, 
+	WAITING_FOR_BID,
+	HANDLING_BID,
 	MOVING_NEST_TO_HAND,
 	DISCARDING,
 	WAITING_FOR_DISCARDS,
@@ -42,6 +43,7 @@ signal hand_updated(player, cards, is_bot)
 signal card_eligibility_updated(eligible_ids)
 signal nest_exchange_updated(cards)
 signal get_bid(player, is_bot)
+signal display_bid(player, bid, is_bot)
 signal trump_suit_updated(suit)
 signal get_discards(player, is_bot, eligible_ids)
 signal nest_aside_updated(cards)
@@ -187,6 +189,7 @@ func check_state():
 					else:
 						print("no trump...")
 				else:
+					self.advance_player()
 					self.state = State.BIDDING
 			else: # done with bidding
 				if self.cards_dealt < self.cards_to_deal_total:
@@ -195,6 +198,24 @@ func check_state():
 					self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
 				else:
 					self.state = State.MOVING_NEST_TO_HAND
+		#State.HANDLING_BID:
+			#if self.maker == -1:
+				#if self.pass_count == self.player_count:
+					#self.pass_count = 0
+					#if self.cards_dealt < self.cards_to_deal_total:
+						#self.state = State.DEALING
+						#self.cards_to_deal = 4
+					#else:
+						#print("no trump...")
+				#else:
+					#self.state = State.BIDDING
+			#else: # done with bidding
+				#if self.cards_dealt < self.cards_to_deal_total:
+					## Finish dealing the rest of the cards.
+					#self.state = State.DEALING
+					#self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
+				#else:
+					#self.state = State.MOVING_NEST_TO_HAND
 		State.MOVING_NEST_TO_HAND:
 			self.state = State.DISCARDING
 		State.DISCARDING:
@@ -421,12 +442,14 @@ func make_bid(bid: Card.Suit):
 	match bid:
 		Card.Suit.NONE: # pass
 			self.pass_count += 1
-			self.advance_player()
 		_:
 			self.maker = self.active_player
 			self.trump_suit = bid
 			if self.view_exists:
 				emit_signal("trump_suit_updated", bid)
+			
+	if self.view_exists:
+		emit_signal("display_bid", self.active_player, bid, self.player_is_bot())
 	self.check_state()
 			
 func move_nest_to_hand():

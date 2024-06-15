@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2owlc45akw7"]
+
+[ext_resource type="Texture2D" uid="uid://de1v32ig6fw53" path="res://images/bid_spade.png" id="1_u85lu"]
+
+[node name="BidSpade" type="Sprite2D"]
+visible = false
+position = Vector2(276, 787)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_u85lu")

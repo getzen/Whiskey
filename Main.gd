@@ -34,6 +34,7 @@ func _ready():
 	self.game.card_eligibility_updated.connect(self.view._on_card_eligibility_updated)
 	self.game.nest_exchange_updated.connect(self.view._on_nest_exchange_updated)
 	self.game.get_bid.connect(self._on_get_bid)
+	self.game.display_bid.connect(self.view._on_display_bid)
 	self.game.trump_suit_updated.connect(self.view._on_trump_suit_updated)
 	self.game.get_discards.connect(self._on_get_discards)
 	self.game.nest_aside_updated.connect(self.view._on_nest_aside_updated)
@@ -105,7 +106,6 @@ func _on_get_bid(player: int, is_bot: bool):
 
 func _on_bid_made(bid: Card.Suit) -> void:
 	self.game.make_bid(bid)
-	#self.do_play_loop()
 	
 func _on_get_discards(player: int, is_bot: bool, id_dict: Dictionary):
 	if is_bot:

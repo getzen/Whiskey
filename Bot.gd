@@ -55,7 +55,6 @@ func score_jokers(hand: Array[Card]) -> int:
 		
 func get_discards(game: Game, p_id: int, eligible_ids: Array[int]) -> Array[int]:
 	print("thinking...")
-
 	var discards: Array[int] = []
 	discards.push_back(eligible_ids.pop_back())
 	discards.push_back(eligible_ids.pop_back())

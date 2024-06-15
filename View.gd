@@ -9,6 +9,7 @@ var center: Vector2
 
 var bid_panel: Panel
 var bid_button: Button
+var bid_markers: Array[Sprite2D]
 
 var discard_panel: Panel
 var done_button: Button
@@ -28,6 +29,7 @@ func _ready():
 	self.center = Vector2(500.0, 500.0)
 	self.bid_panel = get_node("GUI/BidPanel") as Panel
 	self.bid_panel.visible = false
+	
 	
 	self.discard_panel = get_node("GUI/DiscardPanel") as Panel
 	self.done_button = get_node("GUI/DiscardPanel/DoneButton") as Button
@@ -124,6 +126,12 @@ func hand_card_position(player: int, is_bot: bool, card_idx: int, card_count: in
 	var angle = self.player_rotation(player)
 	pos.x += x_offset * cos(angle)
 	pos.y += x_offset * sin(angle)
+	return pos
+	
+func bid_position(player: int) -> Vector2:
+	var distance_from_center = 200.0
+	var rad = self.player_radians_from_center(player)
+	var pos = self.position_from(self.center, rad, distance_from_center)
 	return pos
 	
 func play_position(player: int) -> Vector2:
@@ -237,9 +245,33 @@ func get_bid():
 	
 # The suit buttons and the pass button pass in an int for the suit.
 func _on_bid_button_pressed(bid: Card.Suit) -> void:
-	print(bid)
-	self.bid_panel.visible = false
+	self.bid_panel.visible = false	
 	emit_signal("bid_made", bid)
+	
+func _on_display_bid(player: int, bid: Card.Suit, is_bot: bool) -> void:
+	var resource: Resource
+	match bid:
+		Card.Suit.NONE:
+			resource = load("res://bid_pass.tscn")
+		Card.Suit.CLUB:
+			resource = load("res://bid_club.tscn")
+		Card.Suit.DIAMOND:
+			resource = load("res://bid_diamond.tscn")
+		Card.Suit.HEART:
+			resource = load("res://bid_heart.tscn")
+		Card.Suit.SPADE:
+			resource = load("res://bid_spade.tscn")
+
+	var sprite = resource.instantiate() as Sprite2D
+	sprite.visible = true
+	sprite.position = self.bid_position(player)
+	add_child(sprite)
+	self.bid_markers.push_back(sprite)
+
+func _on_hide_bids() -> void:
+	for sprite in self.bid_markers:
+		remove_child(sprite)
+	self.bid_markers.clear()
 	
 func _on_trump_suit_updated(suit: Card.Suit) -> void:
 	match suit:

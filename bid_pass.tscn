@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqnqtmnpfwgos"]
+
+[ext_resource type="Texture2D" uid="uid://c66ybayqxstcx" path="res://images/bid_pass.png" id="1_rhs8e"]
+
+[node name="BidPass" type="Sprite2D"]
+visible = false
+position = Vector2(275, 409)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_rhs8e")
