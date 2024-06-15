@@ -261,7 +261,7 @@ func _on_bid_button_pressed(bid: Card.Suit) -> void:
 	self.bid_panel.visible = false	
 	emit_signal("bid_made", bid)
 	
-func _on_display_bid(player: int, bid: Card.Suit, is_bot: bool) -> void:
+func _on_display_bid(player: int, bid: Card.Suit) -> void:
 	var resource: Resource
 	match bid:
 		Card.Suit.NONE:

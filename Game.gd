@@ -45,10 +45,10 @@ signal hand_updated(player, cards, is_bot)
 signal card_eligibility_updated(eligible_ids)
 signal nest_exchange_updated(cards)
 signal get_bid(player, is_bot)
-signal display_bid(player, bid, is_bot)
+signal display_bid(player, bid)
 signal hide_bids
 signal trump_suit_updated(suit)
-signal get_discards(player, is_bot, eligible_ids)
+signal get_discards(player, is_bot, hand_cards, eligible_ids)
 signal nest_aside_updated(cards)
 signal get_play(player, is_bot, eligible_ids)
 signal trick_updated(cards)
@@ -310,10 +310,11 @@ func process_actions(time_delta: float):
 			self.move_nest_to_hand()
 		Action.GET_DISCARDS:
 			var is_bot = self.players[self.maker].is_bot
+			var hand = self.players[self.maker].hand
 			var id_dict = self.get_eligible_discards()
 			if self.view_exists:
 				emit_signal("card_eligibility_updated", id_dict)
-			emit_signal("get_discards", self.maker, is_bot, id_dict)
+			emit_signal("get_discards", self.maker, is_bot, hand, id_dict)
 		Action.PREPARE_FOR_NEW_TRICK:
 			self.prepare_for_new_trick()
 		Action.GET_PLAY:
@@ -438,7 +439,7 @@ func make_bid(bid: Card.Suit):
 				emit_signal("trump_suit_updated", bid)
 			
 	if self.view_exists:
-		emit_signal("display_bid", self.active_player, bid, self.player_is_bot())
+		emit_signal("display_bid", self.active_player, bid)
 		#if self.player_is_bot():
 		self.actions.push_back(Action.PAUSE)
 	self.check_state()

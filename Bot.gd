@@ -53,9 +53,21 @@ func score_jokers(hand: Array[Card]) -> int:
 		_:
 			return 0
 		
-func get_discards(game: Game, p_id: int, eligible_ids: Array[int]) -> Array[int]:
+func get_discards(game: Game, p_id: int, hand: Array[Card], eligible_ids: Array[int]) -> Array[int]:
 	print("thinking...")
 	var discards: Array[int] = []
+	
+	var candidates: Array[int] = []
+	for card in hand:
+		if eligible_ids.find(card.id) != -1: # it's eligible
+			# Identify all sensible candidates for discarding.
+			if card.suit == game.trump_suit:
+				continue
+			if card.rank > 11:
+				continue
+			candidates.push_back(card.id)
+	print("Found " + str(candidates.size()) + " candidates.")
+
 	discards.push_back(eligible_ids.pop_back())
 	discards.push_back(eligible_ids.pop_back())
 	return discards

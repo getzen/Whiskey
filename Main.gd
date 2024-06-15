@@ -109,13 +109,13 @@ func _on_get_bid(player: int, is_bot: bool):
 func _on_bid_made(bid: Card.Suit) -> void:
 	self.game.make_bid(bid)
 	
-func _on_get_discards(player: int, is_bot: bool, id_dict: Dictionary):
+func _on_get_discards(player: int, is_bot: bool, hand: Array[Card], id_dict: Dictionary):
 	if is_bot:
-		var bot := Bot.new()	
+		var bot := Bot.new()
 		self.bot_kind = BotKind.Discard	
 		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
-		self.bot_thread.start(bot.get_discards.bind(game_copy, player, id_dict[1]))
+		self.bot_thread.start(bot.get_discards.bind(game_copy, player, hand, id_dict[1]))
 	else:
 		self.view.get_discards()
 
