@@ -21,7 +21,7 @@ func get_bid(game: Game, p_id: int) -> Card.Suit:
 	best_score += score_jokers(hand)
 	# See if score exceeds threshold needed, depending on hand size.
 	#              0  1  2  3  4   5   6   7   8   9
-	var pts_reqs = [0, 0, 0, 0, 0, 28, 29, 30, 31, 32]
+	var pts_reqs = [0, 0, 0, 0, 0, 30, 30, 30, 30, 30]
 	var pts_req = pts_reqs[hand.size()]
 	print("P:" + str(p_id) + " best suit: " + str(best_suit) + ", score: " + str(best_score) + "/" + str(pts_req) )
 		
@@ -136,6 +136,7 @@ func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> int:
 				monte_game.prepare_for_new_trick()
 					
 			# Award points
+			monte_game.award_last_trick_bonus()
 			monte_game.tally_hand_score()
 			if p_id == 0 || p_id == 2:
 				id_scores[idx] += (monte_game.we_points - monte_game.they_points)
