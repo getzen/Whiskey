@@ -40,6 +40,7 @@ enum Action {
 
 signal card_created(card)
 signal active_player_updated(player, state)
+signal deck_updated(cards)
 signal hand_updated(player, cards, is_bot)
 signal card_eligibility_updated(eligible_ids)
 signal nest_exchange_updated(cards)
@@ -241,7 +242,7 @@ func add_actions():
 		State.STARTING:
 			pass
 		State.PREPARING_FOR_NEW_HAND:
-			new_actions = [Action.PREPARE_FOR_NEW_HAND]
+			new_actions = [Action.PREPARE_FOR_NEW_HAND, Action.PAUSE]
 		State.DEALING:
 			new_actions = [Action.HIDE_BIDS]
 			for i in range(self.cards_to_deal):
@@ -358,7 +359,8 @@ func create_cards():
 		self.joker_ids.push_back(id)
 		id += 1
 		
-	self.deck.shuffle()
+	if self.view_exists:
+		emit_signal("deck_updated", self.deck)
 		
 func create_card(id: int, suit: Card.Suit, rank: float, points: int):
 	var card = Card.new(id, suit, rank, points)
@@ -380,6 +382,7 @@ func prepare_for_new_hand() -> void:
 	
 	self.active_player = 0
 	if self.view_exists:
+		emit_signal("deck_updated", self.deck)
 		emit_signal("active_player_updated", self.active_player, self.state)
 		
 	self.cards_dealt = 0
@@ -399,7 +402,6 @@ func prepare_for_new_hand() -> void:
 		if self.view_exists:
 			emit_signal("joker_updated", card)
 		
-	
 	for player in self.players:
 		player.reset_for_new_hand()
 	

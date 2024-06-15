@@ -30,6 +30,7 @@ func _ready():
 	
 	self.game.active_player_updated.connect(self.view._on_active_player_updated)
 	self.game.card_created.connect(self._on_card_created)
+	self.game.deck_updated.connect(self.view._on_deck_updated)
 	self.game.hand_updated.connect(self.view._on_hand_updated)
 	self.game.card_eligibility_updated.connect(self.view._on_card_eligibility_updated)
 	self.game.nest_exchange_updated.connect(self.view._on_nest_exchange_updated)

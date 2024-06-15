@@ -100,7 +100,7 @@ func nest_exchange_position(card_idx: int, card_count: int) -> Vector2:
 	
 func nest_aside_position(card_idx: int, card_count: int) -> Vector2:
 	var x_spacing = 24.0;
-	var pos = Vector2(100.0, 110.0)
+	var pos = Vector2(120.0, 140.0)
 	pos.x -= (card_count - 1) as float * x_spacing / 2.0;
 	pos.x += card_idx as float * x_spacing
 	return pos
@@ -158,7 +158,7 @@ func create_card_node(card: Card) -> CardNode:
 	var resource = preload("res://card_node.tscn")
 	var card_node = resource.instantiate() as CardNode
 	card_node.setup(card)
-	card_node.position = self.deck_position(card.id)
+	card_node.visible = false
 	card_node.z_index = card.id
 	card_node.set_face_up(card.face_up)
 	card_node.mouse_entered.connect(self._on_mouse_entered_card)
@@ -184,6 +184,19 @@ func _on_active_player_updated(player: int, game_state: Game.State):
 			self.update_play_outline(true, player)
 		_:
 			pass
+			
+func _on_deck_updated(cards: Array[Card]) -> void:
+	for i in cards.size():
+		var card = cards[i] as Card
+		var card_node = self.find_card_node(card.id)
+		card_node.visible = true
+		#card_node.position = self.deck_position(card.id)
+		card_node.z_index = i
+		card_node.set_face_up(card.face_up)
+		
+		var new_pos = self.deck_position(i)
+		self.tween_card_position(card_node, new_pos, 0.5)
+		self.tween_card_rotation(card_node, 0.0, 0.2)
 			
 func _on_hand_updated(player: int, cards: Array[Card], is_bot: bool):
 	for i in cards.size():
