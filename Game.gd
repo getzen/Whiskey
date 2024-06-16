@@ -339,9 +339,11 @@ func process_actions(time_delta: float):
 
 func create_cards():
 	var id: int = 0
-	# Base cards. Note that 6 is skipped.
-	for rank in [5, 7, 8, 9, 10, 11, 12, 13, 14]:
-		for suit in [Card.Suit.CLUB, Card.Suit.DIAMOND, Card.Suit.HEART, Card.Suit.SPADE]:
+	
+	for suit in [Card.Suit.CLUB, Card.Suit.DIAMOND, Card.Suit.HEART, Card.Suit.SPADE]:
+		# Base cards. Note that 6 is skipped.
+		for rank in [5, 7, 8, 9, 10, 11, 12, 13, 14]:
+		
 			var points: int
 			match rank:
 				5:
@@ -411,10 +413,10 @@ func deal_card(p: int):
 	self.cards_to_deal -= 1
 	var card = self.deck.pop_back() as Card
 	var player = self.players[p]
-	#if !player.is_bot:
-		#card.face_up = true
 	card.face_up = true
 	player.hand.push_back(card)
+	if !player.is_bot:
+		player.sort_hand()
 	
 	if self.view_exists:
 		emit_signal("hand_updated", p, player.hand, player.is_bot)
@@ -453,6 +455,9 @@ func move_nest_to_hand():
 			#card.face_up = true
 		card.face_up = true
 		player.hand.push_back(card)
+		
+	if !player.is_bot:
+		player.sort_hand()
 		
 	if self.view_exists:
 		emit_signal("hand_updated", self.maker, player.hand, player.is_bot)
@@ -560,19 +565,22 @@ func move_card_to_nest(card_id: int) -> void:
 				emit_signal("nest_exchange_updated", self.nest)
 			break
 
-func move_nest_card_to_hand(id: int, _player: int) -> void:
-	var player = self.players[_player]
+func move_nest_card_to_hand(id: int, p_id: int) -> void:
+	var player = self.players[p_id]
 	
 	for i in range(self.nest.size()):
 		var card = self.nest[i]
 		if card.id == id:
 			self.nest.remove_at(i)
 			player.hand.push_back(card)
-			
-			if self.view_exists:
-				emit_signal("hand_updated", _player, player.hand, player.is_bot)
-				emit_signal("nest_exchange_updated", self.nest)
 			break
+			
+	if !player.is_bot:
+		player.sort_hand()
+		
+	if self.view_exists:
+		emit_signal("hand_updated", p_id, player.hand, player.is_bot)
+		emit_signal("nest_exchange_updated", self.nest)
 
 # There are two discards in the nest, and discarding is over.
 func discards_done() -> void:

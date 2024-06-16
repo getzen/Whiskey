@@ -25,6 +25,9 @@ func reset_for_new_hand():
 	self.hand_points = 0
 	self.out_of_suits.clear()
 	
+func sort_hand():
+	self.hand.sort_custom(func(a, b): return a.id < b.id)
+
 func take_trick(cards: Array[Card]) -> void:
 	for card in cards:
 		self.hand_points += card.points
