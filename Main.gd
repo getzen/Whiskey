@@ -131,7 +131,8 @@ func _on_get_play(player: int, is_bot: bool, id_dict: Dictionary):
 		var game_copy = self.game.make_copy()
 		self.bot_thread = Thread.new()
 		#self.bot_thread.start(bot.get_play.bind(game_copy, player, id_dict))
-		self.bot_thread.start(bot.get_play_monte_carlo.bind(game_copy, player, id_dict))
+		var simulations = 500
+		self.bot_thread.start(bot.get_play_monte_carlo.bind(simulations, game_copy, player, id_dict))
 	else:
 		self.view.get_play(player)
 		

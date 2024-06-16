@@ -99,7 +99,7 @@ func nest_exchange_position(card_idx: int, card_count: int) -> Vector2:
 	return pos
 	
 func nest_aside_position(card_idx: int, card_count: int) -> Vector2:
-	var x_spacing = 24.0;
+	var x_spacing = 50.0 # 24.0
 	var pos = Vector2(120.0, 140.0)
 	pos.x -= (card_count - 1) as float * x_spacing / 2.0;
 	pos.x += card_idx as float * x_spacing
@@ -110,7 +110,7 @@ func hand_card_position(player: int, is_bot: bool, card_idx: int, card_count: in
 	
 	var max_width = 900.0
 	if is_bot:
-		max_width = 300.0
+		max_width = 350.0
 
 	var max_spacing = 85.0
 
@@ -209,11 +209,14 @@ func _on_hand_updated(player: int, cards: Array[Card], is_bot: bool):
 		self.tween_card_position(card_node, new_pos, 0.5)
 		self.tween_card_rotation(card_node, self.player_rotation(player), 0.2)
 		
-func _on_card_eligibility_updated(id_dict: Dictionary):
+func _on_card_eligibility_updated(id_dict: Dictionary, is_bot):
 	var card_nodes = $Cards.get_children() as Array[CardNode]
 	if id_dict.is_empty():
 		for node: CardNode in card_nodes:
 			node.set_eligibility(-1)
+		return
+		
+	if is_bot:
 		return
 		
 	for node: CardNode in card_nodes:
@@ -305,7 +308,7 @@ func discards_done():
 	self.discard_panel.visible = false
 	for outline in self.discard_outlines:
 		outline.visible = false
-	self._on_card_eligibility_updated({})
+	self._on_card_eligibility_updated({}, false)
 		
 func get_play(player: int) -> void:
 	self.update_play_outline(true, player)

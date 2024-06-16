@@ -61,12 +61,11 @@ func get_discards(game: Game, p_id: int, hand: Array[Card], eligible_ids: Array[
 	for card in hand:
 		if eligible_ids.find(card.id) != -1: # it's eligible
 			# Identify all sensible candidates for discarding.
-			if card.suit == game.trump_suit:
+			if card.suit == game.trump_suit: # keep all trump suit cards
 				continue
-			if card.rank > 11:
+			if card.rank == 14: # keep all high cards
 				continue
 			candidates.push_back(card.id)
-	print("Found " + str(candidates.size()) + " candidates.")
 
 	# Create pairs of candidates
 	var pairs = []
@@ -92,8 +91,9 @@ func get_discards(game: Game, p_id: int, hand: Array[Card], eligible_ids: Array[
 				if hand_copy[i].id == id:
 					hand_copy.remove_at(i)
 					break
-					
-		var result = self.get_play_monte_carlo(game_copy, p_id, game_copy.get_eligible_play_cards())
+		
+		var simulations = 50 # 100 is good
+		var result = self.get_play_monte_carlo(simulations, game_copy, p_id, game_copy.get_eligible_play_cards())
 		var score = result[1]
 		print("pair: " + str(pair[0]) + "/" + str(pair[1]) + " score: " + str(score))
 		if score > best_score:
@@ -115,7 +115,7 @@ func get_play(_game: Game, _p_id: int, _eligible_ids: Array[int]) -> int:
 	return _eligible_ids[0]
 
 # Returns [card_id, score]
-func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> Array[int]:
+func get_play_monte_carlo(sims: int, game: Game, p_id: int, id_dict: Dictionary) -> Array[int]:
 	print("bot: ", p_id)
 	#var monte_player = game.players[p_id] as Player
 	var eligible_ids = id_dict[1] as Array[int]
@@ -137,12 +137,11 @@ func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> Array[i
 	for _i in range(eligible_ids.size()):
 		id_scores.push_back(0)
 	
-	var simulations := 600
 	var start_time = Time.get_ticks_msec()
 	var rng := RandomNumberGenerator.new()
 
 	
-	for i in range(simulations):
+	for i in range(sims):
 		# make copy of game and card stock for this simulation...
 		var sim_game = game.make_copy() as Game
 		var hidden_cards_copy = hidden_cards.duplicate(true)

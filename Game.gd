@@ -42,7 +42,7 @@ signal card_created(card)
 signal active_player_updated(player, state)
 signal deck_updated(cards)
 signal hand_updated(player, cards, is_bot)
-signal card_eligibility_updated(eligible_ids)
+signal card_eligibility_updated(eligible_ids, is_bot)
 signal nest_exchange_updated(cards)
 signal get_bid(player, is_bot)
 signal display_bid(player, bid)
@@ -313,7 +313,7 @@ func process_actions(time_delta: float):
 			var hand = self.players[self.maker].hand
 			var id_dict = self.get_eligible_discards()
 			if self.view_exists:
-				emit_signal("card_eligibility_updated", id_dict)
+				emit_signal("card_eligibility_updated", id_dict, is_bot)
 			emit_signal("get_discards", self.maker, is_bot, hand, id_dict)
 		Action.PREPARE_FOR_NEW_TRICK:
 			self.prepare_for_new_trick()
@@ -321,7 +321,7 @@ func process_actions(time_delta: float):
 			var is_bot = self.players[self.active_player].is_bot
 			var id_dict = self.get_eligible_play_cards()
 			if self.view_exists:
-				emit_signal("card_eligibility_updated", id_dict)
+				emit_signal("card_eligibility_updated", id_dict, is_bot)
 			emit_signal("get_play", self.active_player, is_bot, id_dict)
 		Action.AWARD_TRICK:
 			self.award_trick()
@@ -422,6 +422,7 @@ func deal_card(p: int):
 func deal_to_nest(count: int):
 	for i in count:
 		var card = self.deck.pop_back()
+		card.face_up = true
 		self.nest.push_back(card)
 		
 	if self.view_exists:
@@ -448,8 +449,9 @@ func move_nest_to_hand():
 	var player = self.players[self.maker]
 	for i in self.nest.size():
 		var card = self.nest.pop_back()
-		if !player.is_bot:
-			card.face_up = true
+		#if !player.is_bot:
+			#card.face_up = true
+		card.face_up = true
 		player.hand.push_back(card)
 		
 	if self.view_exists:
@@ -576,7 +578,7 @@ func move_nest_card_to_hand(id: int, _player: int) -> void:
 func discards_done() -> void:
 	for i in range(self.nest.size()):
 		var card = self.nest[i]
-		card.face_up = false
+		card.face_up = true
 		
 	if self.view_exists:
 		emit_signal("nest_aside_updated", self.nest)
