@@ -88,6 +88,7 @@ var hand_point_req := 80
 
 var view_exists := true
 var pause_time := 0.0
+var think_time := 0.0
 var actions: Array[Action] = []
 
 func make_copy() -> Game:
@@ -282,6 +283,8 @@ func add_actions():
 		
 
 func process_actions(time_delta: float):
+	self.think_time += time_delta
+	
 	if self.actions.is_empty():
 		return
 		
@@ -314,6 +317,7 @@ func process_actions(time_delta: float):
 			var id_dict = self.get_eligible_discards()
 			if self.view_exists:
 				emit_signal("card_eligibility_updated", id_dict, is_bot)
+			self.think_time = 0.0
 			emit_signal("get_discards", self.maker, is_bot, hand, id_dict)
 		Action.PREPARE_FOR_NEW_TRICK:
 			self.prepare_for_new_trick()
@@ -322,6 +326,7 @@ func process_actions(time_delta: float):
 			var id_dict = self.get_eligible_play_cards()
 			if self.view_exists:
 				emit_signal("card_eligibility_updated", id_dict, is_bot)
+			self.think_time = 0.0
 			emit_signal("get_play", self.active_player, is_bot, id_dict)
 		Action.AWARD_TRICK:
 			self.award_trick()
@@ -592,6 +597,8 @@ func discards_done() -> void:
 		emit_signal("nest_aside_updated", self.nest)
 	
 	self.state = State.PREPARING_FOR_NEW_TRICK
+	if self.think_time < 1.0:
+		self.actions.push_back(Action.PAUSE)
 	self.add_actions()
 		
 func prepare_for_new_trick() -> void:
@@ -663,11 +670,15 @@ func play_card(card_id: int) -> void:
 	var yet_to_play = self.trick.count(null)
 	if yet_to_play > 0:
 		self.advance_player()
-			
+	
+	if self.think_time < 1.0:
+		self.actions.push_back(Action.PAUSE_TINY)
+		
 	if self.view_exists:
 		card.face_up = true
 		emit_signal("hand_updated", p_id, player.hand, player.is_bot)
 		emit_signal("trick_updated", self.trick)
+	
 	
 func update_second_joker() -> void:
 	var found := false
