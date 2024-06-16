@@ -73,7 +73,8 @@ func _process(delta):
 				self.game.discards_done()
 		BotKind.Play:
 			if !self.bot_thread.is_alive():
-				var card_id = self.bot_thread.wait_to_finish()
+				var result = self.bot_thread.wait_to_finish()
+				var card_id = result[0] # score = result[1]
 				self.bot_thread = null
 				print("Bot plays id: ", card_id)
 				self.bot_kind = BotKind.None

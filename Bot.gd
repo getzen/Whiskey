@@ -21,7 +21,7 @@ func get_bid(game: Game, p_id: int) -> Card.Suit:
 	best_score += score_jokers(hand)
 	# See if score exceeds threshold needed, depending on hand size.
 	#              0  1  2  3  4   5   6   7   8   9
-	var pts_reqs = [0, 0, 0, 0, 0, 30, 30, 30, 30, 30]
+	var pts_reqs = [0, 0, 0, 0, 0, 25, 25, 30, 30, 30]
 	var pts_req = pts_reqs[hand.size()]
 	print("P:" + str(p_id) + " best suit: " + str(best_suit) + ", score: " + str(best_score) + "/" + str(pts_req) )
 		
@@ -68,8 +68,42 @@ func get_discards(game: Game, p_id: int, hand: Array[Card], eligible_ids: Array[
 			candidates.push_back(card.id)
 	print("Found " + str(candidates.size()) + " candidates.")
 
-	discards.push_back(eligible_ids.pop_back())
-	discards.push_back(eligible_ids.pop_back())
+	# Create pairs of candidates
+	var pairs = []
+	for i in range(0, candidates.size()-1):
+		for j in range(i+1, candidates.size()):
+			var pair: Array[int] = [candidates[i], candidates[j]]
+			pairs.push_back(pair)
+	print("Created " + str(pairs.size()) + " pairs")
+	
+	var best_pair: Array[int]
+	var best_score = -99999999
+	
+	# Using a copy of game, remove each pair and score the result.
+	for pair: Array[int] in pairs:
+		var game_copy = game.make_copy() as Game
+		game_copy.prepare_for_new_trick()
+		
+		var hand_copy = game_copy.players[p_id].hand as Array[Card]
+		
+		# Remove the two cards from the hand
+		for id in pair:
+			for i in range(hand_copy.size()):
+				if hand_copy[i].id == id:
+					hand_copy.remove_at(i)
+					break
+					
+		var result = self.get_play_monte_carlo(game_copy, p_id, game_copy.get_eligible_play_cards())
+		var score = result[1]
+		print("pair: " + str(pair[0]) + "/" + str(pair[1]) + " score: " + str(score))
+		if score > best_score:
+			best_score = score
+			best_pair = pair
+
+	print("best pair " + str(best_pair[0]) + "/" + str(best_pair[1]) + " best score: " + str(best_score))
+
+	discards.push_back(best_pair[0])
+	discards.push_back(best_pair[1])
 	return discards
 
 
@@ -79,13 +113,14 @@ func get_play(_game: Game, _p_id: int, _eligible_ids: Array[int]) -> int:
 	for i in range(100_000_000):
 		_j = i
 	return _eligible_ids[0]
-	
-func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> int:
+
+# Returns [card_id, score]
+func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> Array[int]:
 	print("bot: ", p_id)
 	#var monte_player = game.players[p_id] as Player
 	var eligible_ids = id_dict[1] as Array[int]
 	if eligible_ids.size() == 1:
-		return eligible_ids[0]
+		return [eligible_ids[0], 0]
 		
 	var best_id := -1
 		
@@ -165,5 +200,5 @@ func get_play_monte_carlo(game: Game, p_id: int, id_dict: Dictionary) -> int:
 	var time_delta = Time.get_ticks_msec() - start_time
 	print("time per eligible id in msec: ", time_delta / eligible_ids.size())
 	print("highest score: ", highest_score)
-	return best_id
+	return [best_id, highest_score]
 	
