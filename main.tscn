@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://lnhvay53r0qh"]
+[gd_scene load_steps=17 format=3 uid="uid://lnhvay53r0qh"]
 
 [ext_resource type="Script" path="res://Main.gd" id="1_mk2k7"]
 [ext_resource type="Script" path="res://View.gd" id="3_de5lh"]
@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://dl8wtvx3xvwoe" path="res://images/circle.png" id="11_6kwdn"]
 [ext_resource type="PackedScene" uid="uid://do8ahk1ggpbp7" path="res://outline.tscn" id="12_87ptn"]
 [ext_resource type="Script" path="res://TrumpSuit.gd" id="13_e8e76"]
+[ext_resource type="Texture2D" uid="uid://chij8v43fgitq" path="res://images/nest_bonus.png" id="14_xenrn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_adiq0"]
 bg_color = Color(0.784314, 0.784314, 0.784314, 0.784314)
@@ -222,6 +223,11 @@ script = ExtResource("13_e8e76")
 [node name="PlayOutline" parent="View/GUI" instance=ExtResource("12_87ptn")]
 visible = false
 position = Vector2(500, 640)
+
+[node name="NestBonus" type="Sprite2D" parent="View/GUI"]
+position = Vector2(241, 150)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("14_xenrn")
 
 [node name="Score" type="Control" parent="View/GUI"]
 layout_mode = 3

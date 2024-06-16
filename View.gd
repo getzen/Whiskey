@@ -99,7 +99,7 @@ func nest_exchange_position(card_idx: int, card_count: int) -> Vector2:
 	return pos
 	
 func nest_aside_position(card_idx: int, card_count: int) -> Vector2:
-	var x_spacing = 50.0 # 24.0
+	var x_spacing = 60.0 # 24.0
 	var pos = Vector2(120.0, 140.0)
 	pos.x -= (card_count - 1) as float * x_spacing / 2.0;
 	pos.x += card_idx as float * x_spacing
