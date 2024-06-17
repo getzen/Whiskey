@@ -81,8 +81,14 @@ func position_from(start_pos: Vector2, radians: float, magnitude: float) -> Vect
 	return Vector2(start_pos.x + cos(radians) * magnitude, start_pos.y + sin(radians) * magnitude)
 	
 func active_player_position(player: int) -> Vector2:
-	var distance_from_center = 470.0
+	var distance_from_center = 450.0
 	var rad = self.player_radians_from_center(player)
+	var pos = self.position_from(self.center, rad, distance_from_center)
+	return pos
+	
+func dealer_position(dealer: int) -> Vector2:
+	var distance_from_center = 480.0
+	var rad = self.player_radians_from_center(dealer)
 	var pos = self.position_from(self.center, rad, distance_from_center)
 	return pos
 	
@@ -184,7 +190,20 @@ func _on_active_player_updated(player: int, game_state: Game.State):
 			self.update_play_outline(true, player)
 		_:
 			pass
-			
+
+func _on_dealer_updated(dealer: int) -> void:
+	$GUI/Dealer.visible = true
+	$GUI/Dealer.position = self.dealer_position(dealer)
+	match dealer:
+		0:
+			$GUI/Dealer.rotation = 0.0
+		1:
+			$GUI/Dealer.rotation = -PI / 2.0
+		2:
+			$GUI/Dealer.rotation = 0.0
+		3:
+			$GUI/Dealer.rotation = PI / 2.0
+	
 func _on_deck_updated(cards: Array[Card]) -> void:
 	for i in cards.size():
 		var card = cards[i] as Card

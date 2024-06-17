@@ -13,6 +13,8 @@ enum State {
 	MOVING_NEST_TO_HAND,
 	DISCARDING,
 	WAITING_FOR_DISCARDS,
+	STARTING_HAND,
+	STARTING_NO_TRUMP,
 	PREPARING_FOR_NEW_TRICK,
 	PLAYING,
 	WAITING_FOR_PLAY,
@@ -27,6 +29,8 @@ enum Action {
 	DEAL_TO_NEST, 
 	GET_BID,
 	HIDE_BIDS,
+	START_HAND,
+	START_NO_TRUMP,
 	MOVE_NEST_TO_HAND,
 	GET_DISCARDS,
 	PREPARE_FOR_NEW_TRICK,
@@ -40,6 +44,7 @@ enum Action {
 
 signal card_created(card)
 signal active_player_updated(player, state)
+signal dealer_updated(dealer)
 signal deck_updated(cards)
 signal hand_updated(player, cards, is_bot)
 signal card_eligibility_updated(eligible_ids, is_bot)
@@ -68,6 +73,7 @@ var joker_ids: Array[int] = []
 
 # These are set in prepare_for_new_hand()
 var active_player: int
+var dealer := 0
 var cards_dealt: int
 var cards_to_deal: int
 var cards_to_deal_total: int
@@ -190,12 +196,14 @@ func check_state():
 					if self.cards_dealt < self.cards_to_deal_total:
 						self.state = State.DEALING
 						self.cards_to_deal = 4
+						self.active_player = self.dealer
+						self.advance_player()
 					else:
-						print("no trump...")
+						self.state = State.STARTING_NO_TRUMP
 				else:
 					self.advance_player()
 					self.state = State.BIDDING
-			else: # done with bidding
+			else: # We have a maker.
 				if self.cards_dealt < self.cards_to_deal_total:
 					# Finish dealing the rest of the cards.
 					self.state = State.DEALING
@@ -208,26 +216,26 @@ func check_state():
 			self.state = State.WAITING_FOR_DISCARDS
 		State.WAITING_FOR_DISCARDS:
 			pass # next state set by discards_done()
+		State.STARTING_HAND:
+			self.state = State.PREPARING_FOR_NEW_TRICK
+		State.STARTING_NO_TRUMP:
+			self.state = State.PREPARING_FOR_NEW_TRICK
 		State.PREPARING_FOR_NEW_TRICK:
 			self.state = State.PLAYING
 		State.PLAYING:
 			self.state = State.WAITING_FOR_PLAY
-			
 		State.WAITING_FOR_PLAY:
 			if self.trick_completed():
 				self.state = State.AWARDING_TRICK
 			else:
 				self.state = State.PLAYING
-				
 		State.AWARDING_TRICK:
 			if self.hand_completed():
 				self.state = State.HAND_OVER
 			else:
 				self.state = State.PREPARING_FOR_NEW_TRICK
-				
 		State.HAND_OVER:
 			print("hand over")
-			
 		State.GAME_OVER:
 			pass
 			
@@ -263,6 +271,10 @@ func add_actions():
 			new_actions = [Action.GET_DISCARDS]
 		State.WAITING_FOR_DISCARDS:
 			pass
+		State.STARTING_HAND:
+			new_actions = [Action.START_HAND]
+		State.STARTING_NO_TRUMP:
+			new_actions = [Action.START_NO_TRUMP]
 		State.PREPARING_FOR_NEW_TRICK:
 			new_actions = [Action.PREPARE_FOR_NEW_TRICK]
 		State.PLAYING:
@@ -309,6 +321,10 @@ func process_actions(time_delta: float):
 			emit_signal("get_bid", self.active_player, self.player_is_bot())
 		Action.HIDE_BIDS:
 			emit_signal("hide_bids")
+		Action.START_HAND:
+			self.start_hand()
+		Action.START_NO_TRUMP:
+			self.start_no_trump_hand()
 		Action.MOVE_NEST_TO_HAND:
 			self.move_nest_to_hand()
 		Action.GET_DISCARDS:
@@ -379,6 +395,11 @@ func advance_player():
 	self.active_player = (self.active_player + 1) % self.player_count
 	if self.view_exists:
 		emit_signal("active_player_updated", self.active_player, self.state)
+		
+func advance_dealer():
+	self.dealer = (self.dealer + 1) % self.player_count
+	if self.view_exists:
+		emit_signal("dealer_updated", self.dealer)
 	
 func start():
 	self.state = State.STARTING
@@ -388,7 +409,10 @@ func prepare_for_new_hand() -> void:
 	# **** Gather cards to deck first, then...
 	self.deck.shuffle()
 	
-	self.active_player = 0
+	self.advance_dealer()
+	self.active_player = self.dealer
+	self.advance_player()
+	
 	if self.view_exists:
 		emit_signal("deck_updated", self.deck)
 		emit_signal("active_player_updated", self.active_player, self.state)
@@ -451,7 +475,17 @@ func make_bid(bid: Card.Suit):
 		#if self.player_is_bot():
 		self.actions.push_back(Action.PAUSE)
 	self.check_state()
-			
+
+func start_hand(): # not a no-trump hand
+	print("Starting hand.")
+	self.active_player = self.maker
+	self.advance_player()
+
+func start_no_trump_hand():
+	print("Starting no-trump hand.")
+	self.active_player = self.dealer
+	self.advance_player()
+	
 func move_nest_to_hand():
 	var player = self.players[self.maker]
 	for i in self.nest.size():
@@ -596,9 +630,7 @@ func discards_done() -> void:
 	if self.view_exists:
 		emit_signal("nest_aside_updated", self.nest)
 	
-	self.state = State.PREPARING_FOR_NEW_TRICK
-	if self.think_time < 1.0:
-		self.actions.push_back(Action.PAUSE)
+	self.state = State.STARTING_HAND
 	self.add_actions()
 		
 func prepare_for_new_trick() -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://lnhvay53r0qh"]
+[gd_scene load_steps=18 format=3 uid="uid://lnhvay53r0qh"]
 
 [ext_resource type="Script" path="res://Main.gd" id="1_mk2k7"]
 [ext_resource type="Script" path="res://View.gd" id="3_de5lh"]
@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://8b82i3jl87mc" path="res://images/spade_mouse_over.png" id="10_8fh0a"]
 [ext_resource type="Texture2D" uid="uid://dl8wtvx3xvwoe" path="res://images/circle.png" id="11_6kwdn"]
 [ext_resource type="PackedScene" uid="uid://do8ahk1ggpbp7" path="res://outline.tscn" id="12_87ptn"]
+[ext_resource type="Texture2D" uid="uid://bbrcrktb5nym2" path="res://images/dealer_marker.png" id="13_bi12y"]
 [ext_resource type="Script" path="res://TrumpSuit.gd" id="13_e8e76"]
 [ext_resource type="Texture2D" uid="uid://chij8v43fgitq" path="res://images/nest_bonus.png" id="14_xenrn"]
 
@@ -211,6 +212,12 @@ modulate = Color(0.784314, 0.784314, 0.784314, 1)
 position = Vector2(500, 959)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("11_6kwdn")
+
+[node name="Dealer" type="Sprite2D" parent="View/GUI"]
+visible = false
+position = Vector2(501, 959)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("13_bi12y")
 
 [node name="TrumpSuit" type="Sprite2D" parent="View/GUI"]
 z_index = -1

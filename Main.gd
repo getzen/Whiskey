@@ -29,6 +29,7 @@ func _ready():
 	self.game = resource.instantiate() as Game
 	
 	self.game.active_player_updated.connect(self.view._on_active_player_updated)
+	self.game.dealer_updated.connect(self.view._on_dealer_updated)
 	self.game.card_created.connect(self._on_card_created)
 	self.game.deck_updated.connect(self.view._on_deck_updated)
 	self.game.hand_updated.connect(self.view._on_hand_updated)

@@ -21,7 +21,7 @@ func get_bid(game: Game, p_id: int) -> Card.Suit:
 	best_score += score_jokers(hand)
 	# See if score exceeds threshold needed, depending on hand size.
 	#              0  1  2  3  4   5   6   7   8   9
-	var pts_reqs = [0, 0, 0, 0, 0, 25, 25, 30, 30, 30]
+	var pts_reqs = [0, 0, 0, 0, 0, 50, 50, 50, 50, 50]
 	var pts_req = pts_reqs[hand.size()]
 	print("P:" + str(p_id) + " best suit: " + str(best_suit) + ", score: " + str(best_score) + "/" + str(pts_req) )
 		
