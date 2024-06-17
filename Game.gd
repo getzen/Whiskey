@@ -91,6 +91,7 @@ var trick_winner: int # player
 var we_points := 0
 var they_points := 0
 var hand_point_req := 80
+var nest_bonus := 10
 
 var view_exists := true
 var pause_time := 0.0
@@ -121,6 +122,8 @@ func make_copy() -> Game:
 	copy.trump_suit = self.trump_suit
 	copy.jokers_played_count = self.jokers_played_count
 	copy.tricks_played = self.tricks_played
+	copy.hand_point_req = self.hand_point_req
+	copy.nest_bonus = self.nest_bonus
 	
 	if self.lead_card != null:
 		copy.lead_card = self.lead_card.make_copy()
@@ -274,7 +277,7 @@ func add_actions():
 		State.STARTING_HAND:
 			new_actions = [Action.START_HAND]
 		State.STARTING_NO_TRUMP:
-			new_actions = [Action.START_NO_TRUMP]
+			new_actions = [Action.HIDE_BIDS, Action.START_NO_TRUMP]
 		State.PREPARING_FOR_NEW_TRICK:
 			new_actions = [Action.PREPARE_FOR_NEW_TRICK]
 		State.PLAYING:
@@ -480,11 +483,15 @@ func start_hand(): # not a no-trump hand
 	print("Starting hand.")
 	self.active_player = self.maker
 	self.advance_player()
+	if self.view_exists:
+		emit_signal("nest_aside_updated", self.nest)
 
 func start_no_trump_hand():
 	print("Starting no-trump hand.")
 	self.active_player = self.dealer
 	self.advance_player()
+	if self.view_exists:
+		emit_signal("nest_aside_updated", self.nest)
 	
 func move_nest_to_hand():
 	var player = self.players[self.maker]
@@ -626,9 +633,6 @@ func discards_done() -> void:
 	for i in range(self.nest.size()):
 		var card = self.nest[i]
 		card.face_up = true
-		
-	if self.view_exists:
-		emit_signal("nest_aside_updated", self.nest)
 	
 	self.state = State.STARTING_HAND
 	self.add_actions()
@@ -748,16 +752,22 @@ func hand_completed() -> bool:
 func award_last_trick_bonus() -> void:
 	var nest_points = 0
 	for card: Card in self.nest:
+		# Very rare scenario: a no-trump hand and both Jokers are in the nest.
+		if self.jokers_played_count == 0 && card.suit == Card.Suit.JOKER:
+			self.jokers_played_count += 1
+			card.points = 20
+			if self.view_exists:
+				emit_signal("joker_updated", card)
+				
 		nest_points += card.points
-	var bonus = 10
 	
-	self.players[self.trick_winner].hand_points += nest_points + bonus
+	self.players[self.trick_winner].hand_points += nest_points + self.nest_bonus
 	
 	var we_hand = self.players[0].hand_points + self.players[2].hand_points
 	var they_hand = self.players[1].hand_points + self.players[3].hand_points
 	
 	if self.view_exists:
-		emit_signal("last_trick_winner", self.trick_winner, nest_points, bonus)
+		emit_signal("last_trick_winner", self.trick_winner, nest_points, self.nest_bonus)
 		emit_signal("points_updated", we_hand, they_hand, self.we_points, self.they_points)
 		pass
 		
