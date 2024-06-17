@@ -769,7 +769,6 @@ func award_last_trick_bonus() -> void:
 	if self.view_exists:
 		emit_signal("last_trick_winner", self.trick_winner, nest_points, self.nest_bonus)
 		emit_signal("points_updated", we_hand, they_hand, self.we_points, self.they_points)
-		pass
 		
 func tally_hand_score() -> void:
 	var we_hand = self.players[0].hand_points + self.players[2].hand_points
@@ -789,6 +788,10 @@ func tally_hand_score() -> void:
 			self.they_points += they_hand
 			made_bid = true
 		self.we_points += we_hand
+		
+	if self.maker == -1: # no trump hand
+		self.we_points += we_hand
+		self.they_points += they_hand
 
 	if self.view_exists:
 		emit_signal("hand_result", self.maker, made_bid)
