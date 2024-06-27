@@ -93,7 +93,7 @@ func dealer_position(dealer: int) -> Vector2:
 	return pos
 	
 func deck_position(card_idx: int) -> Vector2:
-	var pos = Vector2(120.0, 140.0)
+	var pos = Vector2(self.center.x - 30, self.center.y)
 	pos.x += card_idx * 2
 	return pos
 	
@@ -210,7 +210,7 @@ func _on_deck_updated(cards: Array[Card]) -> void:
 		var card_node = self.find_card_node(card.id)
 		card_node.visible = true
 		#card_node.position = self.deck_position(card.id)
-		card_node.z_index = i
+		card_node.z_index = i - 100
 		card_node.set_face_up(card.face_up)
 		
 		var new_pos = self.deck_position(i)

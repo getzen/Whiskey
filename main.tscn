@@ -52,9 +52,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -36.0
-offset_top = -15.0
+offset_top = 118.0
 offset_right = 44.0
-offset_bottom = 16.0
+offset_bottom = 149.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Start"
@@ -239,9 +239,9 @@ texture = ExtResource("14_xenrn")
 [node name="Score" type="Control" parent="View/GUI"]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 712.0
+offset_left = 735.0
 offset_top = 36.0
-offset_right = 752.0
+offset_right = 775.0
 offset_bottom = 76.0
 theme = SubResource("Theme_ssv66")
 
@@ -260,7 +260,7 @@ Hand
 Total"
 
 [node name="WeColumn" type="VBoxContainer" parent="View/GUI/Score/HBoxContainer"]
-custom_minimum_size = Vector2(90, 2.08165e-12)
+custom_minimum_size = Vector2(75, 2.08165e-12)
 layout_mode = 2
 
 [node name="WeLabel" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]

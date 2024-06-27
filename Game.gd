@@ -469,7 +469,7 @@ func deal_to_nest(count: int):
 		self.nest.push_back(card)
 		
 	if self.view_exists:
-		emit_signal("nest_exchange_updated", self.nest)
+		emit_signal("nest_aside_updated", self.nest)
 
 func make_bid(bid: Card.Suit):
 	#print("player: " + str(self.active_player) + " bid made: ", bid)
