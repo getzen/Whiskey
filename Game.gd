@@ -77,7 +77,7 @@ var joker_ids: Array[int] = []
 
 # These are set in prepare_for_new_hand()
 var active_player: int
-var dealer := 0
+var dealer := randi_range(0, player_count - 1)
 var cards_dealt: int
 var cards_to_deal: int
 var cards_to_deal_total: int
