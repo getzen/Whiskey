@@ -1,6 +1,9 @@
 class_name Game
 extends Node
 
+# This controls whether cards are face up, among possibly other things.
+var TESTING = false
+
 enum State {
 	INIT,
 	STARTING,
@@ -445,7 +448,10 @@ func deal_card(p: int):
 	self.cards_to_deal -= 1
 	var card = self.deck.pop_back() as Card
 	var player = self.players[p]
-	card.face_up = true
+	if !player.is_bot || TESTING:
+		card.face_up = true
+	else:
+		card.face_up = false
 	player.hand.push_back(card)
 	if !player.is_bot:
 		player.sort_hand()
@@ -456,7 +462,7 @@ func deal_card(p: int):
 func deal_to_nest(count: int):
 	for i in count:
 		var card = self.deck.pop_back()
-		card.face_up = true
+		card.face_up = false
 		self.nest.push_back(card)
 		
 	if self.view_exists:
