@@ -8,5 +8,5 @@ The game is playable, but incomplete. It needs:
 
 - End-of-hand handling. Right now, the game just abruptly stops at the end of the hand instead of continuing to the next.
 - Correct handling of the Jokers in no-trump hands.
-- Better UX prompt to explain what is happening during the hand.
+- Better UX to guide player about what is happening.
 - Lots more.

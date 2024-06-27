@@ -333,7 +333,7 @@ Players try to capture tricks containing point cards:
 5 = 5 pts			10 = 10 pts		Ace = 15 pts		Second Joker = 20 pts
 
 # Jokers
-The Jokers are always members of the trump suit. The first Joker played in a hand is the highest trump, ranking above the Ace, but worth 0 points. The second Joker played is the lowest trump, ranking below the 5, but worth 20 points.
+The Jokers are always members of the trump suit. The first Joker played in a hand is the highest trump, ranking above the Ace, but worth 0 points. The second Joker played is the lowest trump, ranking below the 5, but worth 20 points. (The rankings are reversed during a no-trump hand. See below.)
 
 # Dealing & Calling Trump
 The Dealer shuffles the cards, deals 5 cards to each player, and places the deck in the center of the table.
@@ -348,7 +348,7 @@ The first player to call out trump becomes the Maker, the suit named is the trum
 The two remaining cards are the “nest.” The Maker adds the two nest cards to his hand, then discards any two cards – except Jokers – face down back to the nest, which is then set aside. The Maker and his partner are known as the Makers. The other team are the Defenders.
 
 # No-Trump Hand
-If no player opts to call a suit and become the Maker after all 9 cards are dealt, then a “no-trump” hand is played. No suits or cards are trump. The Jokers become Diamonds for the hand. The first Joker played is the highest Diamond (ranking above the Ace and still worth 0 points), the second played is the lowest Diamond (ranking below the 5 and still worth 20 points).
+If no player opts to call a trump suit and become the Maker after all 9 cards are dealt, then a “no-trump” hand is played. The Jokers are the only trump cards. As usual, the first Joker played is worth 0 points and the second is worth 20, but the ranks are swapped: the first Joker played is the lowest rank and the second is the highest. So, if both Jokers are played to the same trick, the second Joker takes the trick. (Without this change, a player could lead with a Joker and automatically win the other, 20-point Joker.)
 
 # Card Play
 For the first trick, the player to the Maker’s left leads a card (or the Dealer’s left for a no-trump hand) and play continues clockwise. Players must play a card with the lead suit if possible. Otherwise, they may play any card from their hand.
@@ -361,7 +361,7 @@ The trick winner places any point cards taken face up in a fan in front of him o
 The trick winner then leads the next trick.
 
 # Last Trick
-The winner of the last trick gets 10 bonus points plus the value of any point cards in the nest. (When playing a no-trump hand, there may be one or two Jokers in the nest. A single Joker is worth 20 points. A second Joker in the nest is worth 0 points.)
+The winner of the last trick gets 10 bonus points plus the value of any point cards in the nest. When playing a no-trump hand, there may be one or two Jokers in the nest. A single Joker is worth 20 points. In the extremely rare event – 0.07% chance -- a second Joker is in the nest, it’s worth 0 points.
 
 # Scoring
 Both teams add up the points cards they won, plus the last trick bonus and nest point cards. There are 150 points available in a hand.
