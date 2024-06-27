@@ -38,6 +38,7 @@ enum Action {
 	GET_DISCARDS,
 	PREPARE_FOR_NEW_TRICK,
 	GET_PLAY,
+	AWARD_NEST,
 	AWARD_TRICK,
 	AWARD_LAST_TRICK_BONUS,
 	TALLY_HAND_SCORE,
@@ -290,7 +291,7 @@ func add_actions():
 		State.AWARDING_TRICK:
 			new_actions = [Action.PAUSE, Action.AWARD_TRICK]
 		State.HAND_OVER:
-			new_actions = [Action.AWARD_LAST_TRICK_BONUS, Action.TALLY_HAND_SCORE]
+			new_actions = [Action.AWARD_NEST, Action.AWARD_LAST_TRICK_BONUS, Action.TALLY_HAND_SCORE]
 		State.GAME_OVER:
 			pass
 			
@@ -350,6 +351,8 @@ func process_actions(time_delta: float):
 				emit_signal("card_eligibility_updated", id_dict, is_bot)
 			self.think_time = 0.0
 			emit_signal("get_play", self.active_player, is_bot, id_dict)
+		Action.AWARD_NEST:
+			self.award_nest()
 		Action.AWARD_TRICK:
 			self.award_trick()
 		Action.AWARD_LAST_TRICK_BONUS:
@@ -503,9 +506,10 @@ func move_nest_to_hand():
 	var player = self.players[self.maker]
 	for i in self.nest.size():
 		var card = self.nest.pop_back()
-		#if !player.is_bot:
-			#card.face_up = true
-		card.face_up = true
+		if !player.is_bot || TESTING:
+			card.face_up = true
+		else:
+			card.face_up = false
 		player.hand.push_back(card)
 		
 	if !player.is_bot:
@@ -638,7 +642,7 @@ func move_nest_card_to_hand(id: int, p_id: int) -> void:
 func discards_done() -> void:
 	for i in range(self.nest.size()):
 		var card = self.nest[i]
-		card.face_up = true
+		card.face_up = false
 	
 	self.state = State.STARTING_HAND
 	self.add_actions()
@@ -738,6 +742,13 @@ func update_second_joker() -> void:
 			
 func trick_completed() -> bool:
 	return self.trick.count(null) == 0
+	
+func award_nest() -> void:
+	for card in self.nest:
+		card.face_up = true
+	if self.view_exists:
+		# Perhaps a new signal is needed to not only show nest but display the points etc.
+		emit_signal("nest_aside_updated", self.nest)
 
 func award_trick() -> void:
 	var player = self.players[self.trick_winner]
