@@ -98,7 +98,7 @@ func deck_position(card_idx: int) -> Vector2:
 	return pos
 	
 func nest_exchange_position(card_idx: int, card_count: int) -> Vector2:
-	var x_spacing = 130.0;
+	var x_spacing = 175.0;
 	var pos = self.center
 	pos.x -= (card_count - 1) as float * x_spacing / 2.0;
 	pos.x += card_idx as float * x_spacing
