@@ -9,8 +9,9 @@ enum State {
 	STARTING,
 	PREPARING_FOR_NEW_HAND,
 	DEALING_INITIAL,
-	DEALING_ONE_ROUND,
 	DEALING_TO_NEST, 
+	DEALING_ONE_CARD_EACH,
+	DEALING_OUT,
 	BIDDING, 
 	WAITING_FOR_BID,
 	HANDLING_BID,
@@ -178,16 +179,29 @@ func find_card_in_nest(id) -> Card:
 func on_state_entered(state: State) -> void:
 	match self.state:
 		State.DEALING_INITIAL:
-			self.cards_to_deal = 20
-		State.DEALING_ONE_ROUND:
-			self.cards_to_deal = 4
+			self.cards_to_deal = self.player_count * 5
 		State.DEALING_TO_NEST:
 			self.deal_to_nest(2)
+		State.DEALING_ONE_CARD_EACH:
+			self.cards_to_deal = self.player_count
+		State.DEALING_OUT:
+			self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
+		State.BIDDING:
+			self.pass_count = 0
+		State.MOVING_NEST_TO_HAND:
+			self.move_nest_to_hand()
+		State.DISCARDING:
+			if self.player_is_bot():
+				self.pause_time = 1.0
 		_:
 			pass
 	
 func on_state_exited(state: State) -> void:
 	match self.state:
+		State.BIDDING:
+			emit_signal("hide_bids")
+		State.MOVING_NEST_TO_HAND:
+			
 		_:
 			pass
 	
@@ -215,35 +229,36 @@ func process_state(time_delta: float):
 				self.deal_card(self.active_player)
 				if self.view:
 					self.pause_time = 0.5
-		State.DEALING_ONE_ROUND:
-			self.deal_card(self.active_player)
-			if self.view:
-				self.pause_time = 0.5
 		State.DEALING_TO_NEST:
 			self.change_state(State.BIDDING)
+		State.DEALING_ONE_CARD_EACH:
+			if self.cards_to_deal == 0:
+				self.change_state(State.BIDDING)
+			else:
+				self.deal_card(self.active_player)
+				if self.view:
+					self.pause_time = 0.5
+		
 		State.BIDDING:
-			self.state = State.WAITING_FOR_BID
-		State.WAITING_FOR_BID:
+			pass
 			if self.maker == -1:
 				if self.pass_count == self.player_count:
-					self.pass_count = 0
 					if self.cards_dealt < self.cards_to_deal_total:
-						self.state = State.DEALING
-						self.cards_to_deal = 4
-						self.active_player = self.dealer
-						self.advance_player()
+						#self.active_player = self.dealer
+						#self.advance_player()
+						self.change_state(State.DEALING_ONE_CARD_EACH)
 					else:
-						self.state = State.STARTING_NO_TRUMP
-				else:
+						self.change_state(State.STARTING_NO_TRUMP)
+				else: # Continue bidding
 					self.advance_player()
-					self.state = State.BIDDING
+					emit_signal("get_bid", self.active_player, self.player_is_bot())
 			else: # We have a maker.
 				if self.cards_dealt < self.cards_to_deal_total:
 					# Finish dealing the rest of the cards.
-					self.state = State.DEALING
-					self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
+					self.change_state(State.DEALING_OUT)
 				else:
-					self.state = State.MOVING_NEST_TO_HAND
+					self.change_state(State.MOVING_NEST_TO_HAND)
+					
 		State.MOVING_NEST_TO_HAND:
 			self.state = State.DISCARDING
 		State.DISCARDING:
