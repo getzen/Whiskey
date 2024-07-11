@@ -8,13 +8,14 @@ enum State {
 	INIT,
 	STARTING,
 	PREPARING_FOR_NEW_HAND,
+	DEALING, # Delete this
 	DEALING_INITIAL,
 	DEALING_TO_NEST, 
 	DEALING_ONE_CARD_EACH,
 	DEALING_OUT,
-	BIDDING, 
-	WAITING_FOR_BID,
-	HANDLING_BID,
+	STARTING_BID_ROUND,
+	GETTING_BID, 
+	PLACING_BID,
 	MOVING_NEST_TO_HAND,
 	DISCARDING,
 	WAITING_FOR_DISCARDS,
@@ -176,8 +177,10 @@ func find_card_in_nest(id) -> Card:
 			return card
 	return null
 	
-func on_state_entered(state: State) -> void:
-	match self.state:
+func on_state_entered(_state: State) -> void:
+	match _state:
+		State.PREPARING_FOR_NEW_HAND:
+			self.prepare_for_new_hand()
 		State.DEALING_INITIAL:
 			self.cards_to_deal = self.player_count * 5
 		State.DEALING_TO_NEST:
@@ -186,9 +189,14 @@ func on_state_entered(state: State) -> void:
 			self.cards_to_deal = self.player_count
 		State.DEALING_OUT:
 			self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
-		State.BIDDING:
+		State.STARTING_BID_ROUND:
 			self.pass_count = 0
+			self.active_player = self.dealer
+			self.advance_player()
+		State.GETTING_BID:
+			emit_signal("get_bid", self.active_player, self.player_is_bot())
 		State.MOVING_NEST_TO_HAND:
+			emit_signal("hide_bids")
 			self.move_nest_to_hand()
 		State.DISCARDING:
 			if self.player_is_bot():
@@ -196,12 +204,8 @@ func on_state_entered(state: State) -> void:
 		_:
 			pass
 	
-func on_state_exited(state: State) -> void:
-	match self.state:
-		State.BIDDING:
-			emit_signal("hide_bids")
-		State.MOVING_NEST_TO_HAND:
-			
+func on_state_exited(_state: State) -> void:
+	match _state:
 		_:
 			pass
 	
@@ -227,31 +231,37 @@ func process_state(time_delta: float):
 				self.change_state(State.DEALING_TO_NEST)
 			else:
 				self.deal_card(self.active_player)
-				if self.view:
-					self.pause_time = 0.5
+				self.advance_player()
+				if self.view_exists:
+					self.pause_time = 0.2
 		State.DEALING_TO_NEST:
-			self.change_state(State.BIDDING)
+			self.change_state(State.STARTING_BID_ROUND)
 		State.DEALING_ONE_CARD_EACH:
 			if self.cards_to_deal == 0:
-				self.change_state(State.BIDDING)
+				self.change_state(State.STARTING_BID_ROUND)
 			else:
 				self.deal_card(self.active_player)
-				if self.view:
-					self.pause_time = 0.5
-		
-		State.BIDDING:
-			pass
+				self.advance_player()
+				if self.view_exists:
+					self.pause_time = 0.2
+					
+		State.STARTING_BID_ROUND:
+			self.change_state(State.GETTING_BID)
+			
+		State.GETTING_BID:
+			pass # waiting for bot or player
+			
+		State.PLACING_BID:
+			self.advance_player()
 			if self.maker == -1:
 				if self.pass_count == self.player_count:
 					if self.cards_dealt < self.cards_to_deal_total:
-						#self.active_player = self.dealer
-						#self.advance_player()
+						
 						self.change_state(State.DEALING_ONE_CARD_EACH)
 					else:
 						self.change_state(State.STARTING_NO_TRUMP)
 				else: # Continue bidding
-					self.advance_player()
-					emit_signal("get_bid", self.active_player, self.player_is_bot())
+					self.change_state(State.GETTING_BID)
 			else: # We have a maker.
 				if self.cards_dealt < self.cards_to_deal_total:
 					# Finish dealing the rest of the cards.
@@ -289,197 +299,200 @@ func process_state(time_delta: float):
 			pass
 	
 	
-func check_state():
-	var current_state = self.state
-	match self.state:
-		State.INIT:
-			pass # next state set by start()
-		State.STARTING:
-			self.state = State.PREPARING_FOR_NEW_HAND
-		State.PREPARING_FOR_NEW_HAND:
-			self.state = State.DEALING
-		State.DEALING:
-			if self.cards_dealt == 20:
-				self.state = State.DEALING_TO_NEST
-			elif self.cards_to_deal == 0:
-				if self.maker == -1:
-					self.state = State.BIDDING
-				else:
-					# We just finished dealing out the rest of the cards after a bid.
-					self.state = State.MOVING_NEST_TO_HAND
-		State.DEALING_TO_NEST:
-			self.state = State.BIDDING
-		State.BIDDING:
-			self.state = State.WAITING_FOR_BID
-		State.WAITING_FOR_BID:
-			if self.maker == -1:
-				if self.pass_count == self.player_count:
-					self.pass_count = 0
-					if self.cards_dealt < self.cards_to_deal_total:
-						self.state = State.DEALING
-						self.cards_to_deal = 4
-						self.active_player = self.dealer
-						self.advance_player()
-					else:
-						self.state = State.STARTING_NO_TRUMP
-				else:
-					self.advance_player()
-					self.state = State.BIDDING
-			else: # We have a maker.
-				if self.cards_dealt < self.cards_to_deal_total:
-					# Finish dealing the rest of the cards.
-					self.state = State.DEALING
-					self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
-				else:
-					self.state = State.MOVING_NEST_TO_HAND
-		State.MOVING_NEST_TO_HAND:
-			self.state = State.DISCARDING
-		State.DISCARDING:
-			self.state = State.WAITING_FOR_DISCARDS
-		State.WAITING_FOR_DISCARDS:
-			pass # next state set by discards_done()
-		State.STARTING_HAND:
-			self.state = State.PREPARING_FOR_NEW_TRICK
-		State.STARTING_NO_TRUMP:
-			self.state = State.PREPARING_FOR_NEW_TRICK
-		State.PREPARING_FOR_NEW_TRICK:
-			self.state = State.PLAYING
-		State.PLAYING:
-			self.state = State.WAITING_FOR_PLAY
-		State.WAITING_FOR_PLAY:
-			if self.trick_completed():
-				self.state = State.AWARDING_TRICK
-			else:
-				self.state = State.PLAYING
-		State.AWARDING_TRICK:
-			if self.hand_completed():
-				self.state = State.HAND_OVER
-			else:
-				self.state = State.PREPARING_FOR_NEW_TRICK
-		State.HAND_OVER:
-			print("hand over")
-		State.GAME_OVER:
-			pass
-			
-	if current_state != self.state:
-		print("New state: %s" % [State.keys()[self.state]])
-		self.add_actions()
+#func check_state():
+	#var current_state = self.state
+	#match self.state:
+		#State.INIT:
+			#pass # next state set by start()
+		#State.STARTING:
+			#self.state = State.PREPARING_FOR_NEW_HAND
+		#State.PREPARING_FOR_NEW_HAND:
+			#self.state = State.DEALING
+		#State.DEALING:
+			#if self.cards_dealt == 20:
+				#self.state = State.DEALING_TO_NEST
+			#elif self.cards_to_deal == 0:
+				#if self.maker == -1:
+					#self.state = State.BIDDING
+				#else:
+					## We just finished dealing out the rest of the cards after a bid.
+					#self.state = State.MOVING_NEST_TO_HAND
+		#State.DEALING_TO_NEST:
+			#self.state = State.BIDDING
+		#State.BIDDING:
+			#self.state = State.WAITING_FOR_BID
+		#State.WAITING_FOR_BID:
+			#if self.maker == -1:
+				#if self.pass_count == self.player_count:
+					#self.pass_count = 0
+					#if self.cards_dealt < self.cards_to_deal_total:
+						#self.state = State.DEALING
+						#self.cards_to_deal = 4
+						#self.active_player = self.dealer
+						#self.advance_player()
+					#else:
+						#self.state = State.STARTING_NO_TRUMP
+				#else:
+					#self.advance_player()
+					#self.state = State.BIDDING
+			#else: # We have a maker.
+				#if self.cards_dealt < self.cards_to_deal_total:
+					## Finish dealing the rest of the cards.
+					#self.state = State.DEALING
+					#self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
+				#else:
+					#self.state = State.MOVING_NEST_TO_HAND
+		#State.MOVING_NEST_TO_HAND:
+			#self.state = State.DISCARDING
+		#State.DISCARDING:
+			#self.state = State.WAITING_FOR_DISCARDS
+		#State.WAITING_FOR_DISCARDS:
+			#pass # next state set by discards_done()
+		#State.STARTING_HAND:
+			#self.state = State.PREPARING_FOR_NEW_TRICK
+		#State.STARTING_NO_TRUMP:
+			#self.state = State.PREPARING_FOR_NEW_TRICK
+		#State.PREPARING_FOR_NEW_TRICK:
+			#self.state = State.PLAYING
+		#State.PLAYING:
+			#self.state = State.WAITING_FOR_PLAY
+		#State.WAITING_FOR_PLAY:
+			#if self.trick_completed():
+				#self.state = State.AWARDING_TRICK
+			#else:
+				#self.state = State.PLAYING
+		#State.AWARDING_TRICK:
+			#if self.hand_completed():
+				#self.state = State.HAND_OVER
+			#else:
+				#self.state = State.PREPARING_FOR_NEW_TRICK
+		#State.HAND_OVER:
+			#print("hand over")
+		#State.GAME_OVER:
+			#pass
+			#
+	#if current_state != self.state:
+		#print("New state: %s" % [State.keys()[self.state]])
+		#self.add_actions()
 
-func add_actions():
-	var new_actions = []
-	match self.state:
-		State.INIT:
-			pass
-		State.STARTING:
-			pass
-		State.PREPARING_FOR_NEW_HAND:
-			new_actions = [Action.PREPARE_FOR_NEW_HAND, Action.PAUSE]
-		State.DEALING:
-			new_actions = [Action.HIDE_BIDS]
-			for i in range(self.cards_to_deal):
-				new_actions.push_back(Action.DEAL_CARD)
-				new_actions.push_back(Action.PAUSE_TINY)
-		State.DEALING_TO_NEST:
-			new_actions = [Action.PAUSE, Action.DEAL_TO_NEST]
-		State.BIDDING:
-			new_actions = [Action.GET_BID]
-		State.WAITING_FOR_BID:
-			pass
-		State.MOVING_NEST_TO_HAND:
-			new_actions = [Action.HIDE_BIDS, Action.MOVE_NEST_TO_HAND]
-			if self.player_is_bot():
-				new_actions.push_back(Action.PAUSE)
-		State.DISCARDING:
-			new_actions = [Action.GET_DISCARDS]
-		State.WAITING_FOR_DISCARDS:
-			pass
-		State.STARTING_HAND:
-			new_actions = [Action.START_HAND]
-		State.STARTING_NO_TRUMP:
-			new_actions = [Action.HIDE_BIDS, Action.START_NO_TRUMP]
-		State.PREPARING_FOR_NEW_TRICK:
-			new_actions = [Action.PREPARE_FOR_NEW_TRICK]
-		State.PLAYING:
-			new_actions = [Action.GET_PLAY]
-		State.WAITING_FOR_PLAY:
-			pass
-		State.AWARDING_TRICK:
-			new_actions = [Action.PAUSE, Action.AWARD_TRICK]
-		State.HAND_OVER:
-			new_actions = [Action.AWARD_NEST, Action.AWARD_LAST_TRICK_BONUS, Action.TALLY_HAND_SCORE]
-		State.GAME_OVER:
-			pass
-			
-	if !new_actions.is_empty():
-		for a in new_actions:
-			self.actions.push_back(a)
-		self.actions.push_back(Action.CHECK_STATE)
+#func add_actions():
+	#var new_actions = []
+	#match self.state:
+		#State.INIT:
+			#pass
+		#State.STARTING:
+			#pass
+		#State.PREPARING_FOR_NEW_HAND:
+			#new_actions = [Action.PREPARE_FOR_NEW_HAND, Action.PAUSE]
+		#State.DEALING:
+			#new_actions = [Action.HIDE_BIDS]
+			#for i in range(self.cards_to_deal):
+				#new_actions.push_back(Action.DEAL_CARD)
+				#new_actions.push_back(Action.PAUSE_TINY)
+		#State.DEALING_TO_NEST:
+			#new_actions = [Action.PAUSE, Action.DEAL_TO_NEST]
+		#State.BIDDING:
+			#new_actions = [Action.GET_BID]
+		#State.WAITING_FOR_BID:
+			#pass
+		#State.MOVING_NEST_TO_HAND:
+			#new_actions = [Action.HIDE_BIDS, Action.MOVE_NEST_TO_HAND]
+			#if self.player_is_bot():
+				#new_actions.push_back(Action.PAUSE)
+		#State.DISCARDING:
+			#new_actions = [Action.GET_DISCARDS]
+		#State.WAITING_FOR_DISCARDS:
+			#pass
+		#State.STARTING_HAND:
+			#new_actions = [Action.START_HAND]
+		#State.STARTING_NO_TRUMP:
+			#new_actions = [Action.HIDE_BIDS, Action.START_NO_TRUMP]
+		#State.PREPARING_FOR_NEW_TRICK:
+			#new_actions = [Action.PREPARE_FOR_NEW_TRICK]
+		#State.PLAYING:
+			#new_actions = [Action.GET_PLAY]
+		#State.WAITING_FOR_PLAY:
+			#pass
+		#State.AWARDING_TRICK:
+			#new_actions = [Action.PAUSE, Action.AWARD_TRICK]
+		#State.HAND_OVER:
+			#new_actions = [Action.AWARD_NEST, Action.AWARD_LAST_TRICK_BONUS, Action.TALLY_HAND_SCORE]
+		#State.GAME_OVER:
+			#pass
+			#
+	#if !new_actions.is_empty():
+		#for a in new_actions:
+			#self.actions.push_back(a)
+		#self.actions.push_back(Action.CHECK_STATE)
 		
 
 func process_actions(time_delta: float):
 	self.think_time += time_delta
+	self.process_state(time_delta)
 	
-	if self.actions.is_empty():
-		return
-		
-	if self.pause_time > 0.0:
-		self.pause_time -= time_delta
-		if self.pause_time <= 0.0:
-			self.pause_time = 0.0
-		return
-		
-	var action = self.actions.pop_front()
-	match action:
-		Action.CHECK_STATE:
-			self.check_state()
-		Action.PREPARE_FOR_NEW_HAND:
-			self.prepare_for_new_hand()
-		Action.DEAL_CARD:
-			self.deal_card(self.active_player)
-			self.advance_player()
-		Action.DEAL_TO_NEST:
-			self.deal_to_nest(2)
-		Action.GET_BID:
-			emit_signal("get_bid", self.active_player, self.player_is_bot())
-		Action.HIDE_BIDS:
-			emit_signal("hide_bids")
-		Action.START_HAND:
-			self.start_hand()
-		Action.START_NO_TRUMP:
-			self.start_no_trump_hand()
-		Action.MOVE_NEST_TO_HAND:
-			self.move_nest_to_hand()
-		Action.GET_DISCARDS:
-			var is_bot = self.players[self.maker].is_bot
-			var hand = self.players[self.maker].hand
-			var id_dict = self.get_eligible_discards()
-			if self.view_exists:
-				emit_signal("card_eligibility_updated", id_dict, is_bot)
-			self.think_time = 0.0
-			emit_signal("get_discards", self.maker, is_bot, hand, id_dict)
-		Action.PREPARE_FOR_NEW_TRICK:
-			self.prepare_for_new_trick()
-		Action.GET_PLAY:
-			var is_bot = self.players[self.active_player].is_bot
-			var id_dict = self.get_eligible_play_cards()
-			if self.view_exists:
-				emit_signal("card_eligibility_updated", id_dict, is_bot)
-			self.think_time = 0.0
-			emit_signal("get_play", self.active_player, is_bot, id_dict)
-		Action.AWARD_NEST:
-			self.award_nest()
-		Action.AWARD_TRICK:
-			self.award_trick()
-		Action.AWARD_LAST_TRICK_BONUS:
-			self.award_last_trick_bonus()
-		Action.TALLY_HAND_SCORE:
-			self.tally_hand_score()
-		Action.PAUSE_TINY:
-			if self.view_exists:
-				self.pause_time = 0.1
-		Action.PAUSE:
-			if self.view_exists:
-				self.pause_time = 1.0
+	return ####################################
+	
+	#if self.actions.is_empty():
+		#return
+		#
+	#if self.pause_time > 0.0:
+		#self.pause_time -= time_delta
+		#if self.pause_time <= 0.0:
+			#self.pause_time = 0.0
+		#return
+		#
+	#var action = self.actions.pop_front()
+	#match action:
+		#Action.CHECK_STATE:
+			#self.check_state()
+		#Action.PREPARE_FOR_NEW_HAND:
+			#self.prepare_for_new_hand()
+		#Action.DEAL_CARD:
+			#self.deal_card(self.active_player)
+			#self.advance_player()
+		#Action.DEAL_TO_NEST:
+			#self.deal_to_nest(2)
+		#Action.GET_BID:
+			#emit_signal("get_bid", self.active_player, self.player_is_bot())
+		#Action.HIDE_BIDS:
+			#emit_signal("hide_bids")
+		#Action.START_HAND:
+			#self.start_hand()
+		#Action.START_NO_TRUMP:
+			#self.start_no_trump_hand()
+		#Action.MOVE_NEST_TO_HAND:
+			#self.move_nest_to_hand()
+		#Action.GET_DISCARDS:
+			#var is_bot = self.players[self.maker].is_bot
+			#var hand = self.players[self.maker].hand
+			#var id_dict = self.get_eligible_discards()
+			#if self.view_exists:
+				#emit_signal("card_eligibility_updated", id_dict, is_bot)
+			#self.think_time = 0.0
+			#emit_signal("get_discards", self.maker, is_bot, hand, id_dict)
+		#Action.PREPARE_FOR_NEW_TRICK:
+			#self.prepare_for_new_trick()
+		#Action.GET_PLAY:
+			#var is_bot = self.players[self.active_player].is_bot
+			#var id_dict = self.get_eligible_play_cards()
+			#if self.view_exists:
+				#emit_signal("card_eligibility_updated", id_dict, is_bot)
+			#self.think_time = 0.0
+			#emit_signal("get_play", self.active_player, is_bot, id_dict)
+		#Action.AWARD_NEST:
+			#self.award_nest()
+		#Action.AWARD_TRICK:
+			#self.award_trick()
+		#Action.AWARD_LAST_TRICK_BONUS:
+			#self.award_last_trick_bonus()
+		#Action.TALLY_HAND_SCORE:
+			#self.tally_hand_score()
+		#Action.PAUSE_TINY:
+			#if self.view_exists:
+				#self.pause_time = 0.1
+		#Action.PAUSE:
+			#if self.view_exists:
+				#self.pause_time = 1.0
 					
 
 func create_cards():
@@ -526,8 +539,7 @@ func advance_dealer():
 		emit_signal("dealer_updated", self.dealer)
 	
 func start():
-	self.state = State.STARTING
-	self.check_state()
+	self.change_state(State.STARTING)
 		
 func prepare_for_new_hand() -> void:
 	# **** Gather cards to deck first, then...
@@ -599,9 +611,10 @@ func make_bid(bid: Card.Suit):
 			
 	if self.view_exists:
 		emit_signal("display_bid", self.active_player, bid)
+		
+	self.change_state(State.PLACING_BID)
 		#if self.player_is_bot():
-		self.actions.push_back(Action.PAUSE)
-	self.check_state()
+		#self.actions.push_back(Action.PAUSE)
 
 func start_hand(): # not a no-trump hand
 	print("Starting hand.")
@@ -717,7 +730,7 @@ func eligible_card_pressed(id) -> void:
 			var hand_card = self.find_card_in_hand(id, self.active_player)
 			if hand_card != null:
 				self.play_card(id)
-				self.check_state()
+				#self.check_state()
 				
 		_:
 			print("no dice")
@@ -758,9 +771,7 @@ func discards_done() -> void:
 	for i in range(self.nest.size()):
 		var card = self.nest[i]
 		card.face_up = false
-	
-	self.state = State.STARTING_HAND
-	self.add_actions()
+	self.change_state(State.STARTING_HAND)
 		
 func prepare_for_new_trick() -> void:
 	self.lead_card = null
