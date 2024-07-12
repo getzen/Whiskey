@@ -5,6 +5,7 @@ extends Node
 var TESTING = false
 
 enum State {
+	NONE, # for next_state property, to indicate no change in state
 	INIT,
 	STARTING,
 	PREPARING_FOR_NEW_HAND,
@@ -76,6 +77,7 @@ var nest: Array[Card] = []
 var players: Array[Player] = []
 var trick: Array[Card] = []
 var state: State = State.INIT
+var next_state: State = State.NONE
 var joker_ids: Array[int] = []
 
 # These are set in prepare_for_new_hand()
@@ -101,7 +103,8 @@ var hand_point_req := 80
 var nest_bonus := 10
 
 var view_exists := true
-var pause_time := 0.0
+var process_delay := 0.0
+var next_state_delay := 0.0
 var think_time := 0.0
 var actions: Array[Action] = []
 
@@ -186,8 +189,10 @@ func on_state_entered(_state: State) -> void:
 		State.DEALING_TO_NEST:
 			self.deal_to_nest(2)
 		State.DEALING_ONE_CARD_EACH:
+			emit_signal("hide_bids")
 			self.cards_to_deal = self.player_count
 		State.DEALING_OUT:
+			emit_signal("hide_bids")
 			self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
 		State.STARTING_BID_ROUND:
 			self.pass_count = 0
@@ -215,10 +220,18 @@ func change_state(new_state: State) -> void:
 	self.on_state_entered(self.state)
 	
 func process_state(time_delta: float):
-	self.pause_time = max(self.pause_time - time_delta, 0.0)
-	if pause_time > 0.0:
+	if self.next_state != State.NONE:
+		self.next_state_delay = max(self.next_state_delay - time_delta, 0.0)
+		if self.next_state_delay == 0.0:
+			self.change_state(self.next_state)
+			self.next_state = State.NONE
+		else:
+			return
+			
+	self.process_delay = max(self.process_delay - time_delta, 0.0)
+	if process_delay > 0.0:
 		return
-
+	
 	match self.state:
 		State.INIT:
 			pass # next state set by start()
@@ -233,7 +246,7 @@ func process_state(time_delta: float):
 				self.deal_card(self.active_player)
 				self.advance_player()
 				if self.view_exists:
-					self.pause_time = 0.2
+					self.process_delay = 0.2
 		State.DEALING_TO_NEST:
 			self.change_state(State.STARTING_BID_ROUND)
 		State.DEALING_ONE_CARD_EACH:
@@ -243,10 +256,21 @@ func process_state(time_delta: float):
 				self.deal_card(self.active_player)
 				self.advance_player()
 				if self.view_exists:
-					self.pause_time = 0.2
+					self.process_delay = 0.1
+					
+		State.DEALING_OUT:
+			if self.cards_to_deal == 0:
+				self.change_state(State.MOVING_NEST_TO_HAND)
+			else:
+				self.deal_card(self.active_player)
+				self.advance_player()
+				if self.view_exists:
+					self.process_delay = 0.1
 					
 		State.STARTING_BID_ROUND:
-			self.change_state(State.GETTING_BID)
+			self.next_state = State.GETTING_BID
+			if self.view_exists && self.player_is_bot():
+				self.next_state_delay = 1.0
 			
 		State.GETTING_BID:
 			pass # waiting for bot or player
@@ -256,18 +280,27 @@ func process_state(time_delta: float):
 			if self.maker == -1:
 				if self.pass_count == self.player_count:
 					if self.cards_dealt < self.cards_to_deal_total:
-						
-						self.change_state(State.DEALING_ONE_CARD_EACH)
+						self.next_state = State.DEALING_ONE_CARD_EACH
+						if self.view_exists && self.player_is_bot():
+							self.next_state_delay = 1.0
 					else:
 						self.change_state(State.STARTING_NO_TRUMP)
 				else: # Continue bidding
-					self.change_state(State.GETTING_BID)
+					self.next_state = State.GETTING_BID
+					if self.view_exists && self.player_is_bot():
+						self.next_state_delay = 1.0
+						
 			else: # We have a maker.
+				if self.view_exists:
+					if self.player_is_bot():
+						self.next_state_delay = 2.0
+					else:
+						self.next_state_delay = 1.0
 				if self.cards_dealt < self.cards_to_deal_total:
 					# Finish dealing the rest of the cards.
-					self.change_state(State.DEALING_OUT)
+					self.next_state = State.DEALING_OUT
 				else:
-					self.change_state(State.MOVING_NEST_TO_HAND)
+					self.next_state = State.MOVING_NEST_TO_HAND
 					
 		State.MOVING_NEST_TO_HAND:
 			self.state = State.DISCARDING
