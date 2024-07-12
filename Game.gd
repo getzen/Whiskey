@@ -248,10 +248,10 @@ func process_state(time_delta: float):
 				if self.view_exists:
 					self.process_delay = 0.2
 		State.DEALING_TO_NEST:
-			self.change_state(State.STARTING_BID_ROUND)
+			self.next_state = State.STARTING_BID_ROUND
 		State.DEALING_ONE_CARD_EACH:
 			if self.cards_to_deal == 0:
-				self.change_state(State.STARTING_BID_ROUND)
+				self.next_state = State.STARTING_BID_ROUND
 			else:
 				self.deal_card(self.active_player)
 				self.advance_player()
@@ -260,7 +260,7 @@ func process_state(time_delta: float):
 					
 		State.DEALING_OUT:
 			if self.cards_to_deal == 0:
-				self.change_state(State.MOVING_NEST_TO_HAND)
+				self.next_state = State.MOVING_NEST_TO_HAND
 			else:
 				self.deal_card(self.active_player)
 				self.advance_player()
@@ -284,7 +284,7 @@ func process_state(time_delta: float):
 						if self.view_exists && self.player_is_bot():
 							self.next_state_delay = 1.0
 					else:
-						self.change_state(State.STARTING_NO_TRUMP)
+						self.next_state = State.STARTING_NO_TRUMP
 				else: # Continue bidding
 					self.next_state = State.GETTING_BID
 					if self.view_exists && self.player_is_bot():
@@ -646,8 +646,6 @@ func make_bid(bid: Card.Suit):
 		emit_signal("display_bid", self.active_player, bid)
 		
 	self.change_state(State.PLACING_BID)
-		#if self.player_is_bot():
-		#self.actions.push_back(Action.PAUSE)
 
 func start_hand(): # not a no-trump hand
 	print("Starting hand.")
