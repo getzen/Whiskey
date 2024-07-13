@@ -184,7 +184,7 @@ func _on_active_player_updated(player: int, game_state: Game.State):
 	$GUI/ActivePlayer.visible = true
 	$GUI/ActivePlayer.position = self.active_player_position(player)
 	match game_state as Game.State:
-		Game.State.WAITING_FOR_PLAY:
+		Game.State.GETTING_PLAY:
 			self.update_play_outline(true, player)
 		Game.State.AWARDING_TRICK:
 			self.update_play_outline(true, player)

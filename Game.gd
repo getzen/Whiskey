@@ -22,8 +22,8 @@ enum State {
 	STARTING_HAND,
 	STARTING_NO_TRUMP,
 	PREPARING_FOR_NEW_TRICK,
-	PLAYING,
-	WAITING_FOR_PLAY,
+	GETTING_PLAY,
+	PLAYING_CARD,
 	AWARDING_TRICK,
 	HAND_OVER,
 	GAME_OVER
@@ -183,25 +183,33 @@ func on_state_entered(_state: State) -> void:
 	match _state:
 		State.PREPARING_FOR_NEW_HAND:
 			self.prepare_for_new_hand()
+			
 		State.DEALING_INITIAL:
 			self.cards_to_deal = self.player_count * 5
+			
 		State.DEALING_TO_NEST:
 			self.deal_to_nest(2)
+			
 		State.DEALING_ONE_CARD_EACH:
 			emit_signal("hide_bids")
 			self.cards_to_deal = self.player_count
+			
 		State.DEALING_OUT:
 			emit_signal("hide_bids")
 			self.cards_to_deal = self.cards_to_deal_total - self.cards_dealt
+			
 		State.STARTING_BID_ROUND:
 			self.pass_count = 0
 			self.active_player = self.dealer
 			self.advance_player()
+			
 		State.GETTING_BID:
 			emit_signal("get_bid", self.active_player, self.player_is_bot())
+			
 		State.MOVING_NEST_TO_HAND:
 			emit_signal("hide_bids")
 			self.move_nest_to_hand()
+			
 		State.DISCARDING:
 			self.active_player = self.maker
 			var is_bot = self.players[self.maker].is_bot
@@ -211,17 +219,23 @@ func on_state_entered(_state: State) -> void:
 				emit_signal("card_eligibility_updated", id_dict, is_bot)
 			self.think_time = 0.0
 			emit_signal("get_discards", self.maker, is_bot, hand, id_dict)
+			
 		State.STARTING_HAND:
 			self.start_hand()
+			
 		State.PREPARING_FOR_NEW_TRICK:
 			self.prepare_for_new_trick()
-		State.PLAYING:
+			
+		State.GETTING_PLAY:
 			var is_bot = self.players[self.active_player].is_bot
 			var id_dict = self.get_eligible_play_cards()
 			if self.view_exists:
 				emit_signal("card_eligibility_updated", id_dict, is_bot)
 			self.think_time = 0.0
 			emit_signal("get_play", self.active_player, is_bot, id_dict)
+			
+		State.AWARDING_TRICK:
+			self.award_trick()
 		_:
 			pass
 	
@@ -255,8 +269,10 @@ func process_state(time_delta: float):
 			pass # next state set by start()
 		State.STARTING:
 			self.change_state(State.PREPARING_FOR_NEW_HAND)
+			
 		State.PREPARING_FOR_NEW_HAND:
 			self.change_state(State.DEALING_INITIAL)
+			
 		State.DEALING_INITIAL:
 			if self.cards_to_deal == 0:
 				self.change_state(State.DEALING_TO_NEST)
@@ -265,8 +281,10 @@ func process_state(time_delta: float):
 				self.advance_player()
 				if self.view_exists:
 					self.process_delay = 0.2
+					
 		State.DEALING_TO_NEST:
 			self.next_state = State.STARTING_BID_ROUND
+			
 		State.DEALING_ONE_CARD_EACH:
 			if self.cards_to_deal == 0:
 				self.next_state = State.STARTING_BID_ROUND
@@ -333,23 +351,30 @@ func process_state(time_delta: float):
 			self.next_state = State.PREPARING_FOR_NEW_TRICK
 			
 		State.PREPARING_FOR_NEW_TRICK:
-			self.next_state = State.PLAYING
+			self.next_state = State.GETTING_PLAY
 			
-		State.PLAYING:
-			self.state = State.WAITING_FOR_PLAY
+		State.GETTING_PLAY:
+			pass
 			
-		State.WAITING_FOR_PLAY:
+		State.PLAYING_CARD:
 			if self.trick_completed():
-				self.state = State.AWARDING_TRICK
+				if self.view_exists:
+					self.next_state_delay = 1.5
+				self.next_state = State.AWARDING_TRICK
 			else:
-				self.state = State.PLAYING
+				if self.view_exists:
+					self.next_state_delay = 0.5
+				self.next_state = State.GETTING_PLAY
+				
 		State.AWARDING_TRICK:
 			if self.hand_completed():
-				self.state = State.HAND_OVER
+				self.next_state = State.HAND_OVER
 			else:
-				self.state = State.PREPARING_FOR_NEW_TRICK
+				self.next_state = State.PREPARING_FOR_NEW_TRICK
+				
 		State.HAND_OVER:
-			print("hand over")
+			pass
+			
 		State.GAME_OVER:
 			pass
 	
@@ -779,7 +804,7 @@ func eligible_card_pressed(id) -> void:
 				if nest_card != null:
 					self.move_nest_card_to_hand(id, self.active_player)
 					
-		State.WAITING_FOR_PLAY:
+		State.GETTING_PLAY:
 			var hand_card = self.find_card_in_hand(id, self.active_player)
 			if hand_card != null:
 				self.play_card(id)
@@ -903,6 +928,8 @@ func play_card(card_id: int) -> void:
 		card.face_up = true
 		emit_signal("hand_updated", p_id, player.hand, player.is_bot)
 		emit_signal("trick_updated", self.trick)
+	
+	self.change_state(State.PLAYING_CARD)
 	
 	
 func update_second_joker() -> void:
