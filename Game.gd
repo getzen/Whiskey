@@ -19,7 +19,6 @@ enum State {
 	PLACING_BID,
 	MOVING_NEST_TO_HAND,
 	DISCARDING,
-	WAITING_FOR_DISCARDS,
 	STARTING_HAND,
 	STARTING_NO_TRUMP,
 	PREPARING_FOR_NEW_TRICK,
@@ -204,8 +203,25 @@ func on_state_entered(_state: State) -> void:
 			emit_signal("hide_bids")
 			self.move_nest_to_hand()
 		State.DISCARDING:
-			if self.player_is_bot():
-				self.pause_time = 1.0
+			self.active_player = self.maker
+			var is_bot = self.players[self.maker].is_bot
+			var hand = self.players[self.maker].hand
+			var id_dict = self.get_eligible_discards()
+			if self.view_exists:
+				emit_signal("card_eligibility_updated", id_dict, is_bot)
+			self.think_time = 0.0
+			emit_signal("get_discards", self.maker, is_bot, hand, id_dict)
+		State.STARTING_HAND:
+			self.start_hand()
+		State.PREPARING_FOR_NEW_TRICK:
+			self.prepare_for_new_trick()
+		State.PLAYING:
+			var is_bot = self.players[self.active_player].is_bot
+			var id_dict = self.get_eligible_play_cards()
+			if self.view_exists:
+				emit_signal("card_eligibility_updated", id_dict, is_bot)
+			self.think_time = 0.0
+			emit_signal("get_play", self.active_player, is_bot, id_dict)
 		_:
 			pass
 	
@@ -228,6 +244,8 @@ func process_state(time_delta: float):
 		else:
 			return
 			
+	self.think_time += time_delta
+	
 	self.process_delay = max(self.process_delay - time_delta, 0.0)
 	if process_delay > 0.0:
 		return
@@ -277,7 +295,7 @@ func process_state(time_delta: float):
 			
 		State.PLACING_BID:
 			self.advance_player()
-			if self.maker == -1:
+			if self.maker == -1: # player passed
 				if self.pass_count == self.player_count:
 					if self.cards_dealt < self.cards_to_deal_total:
 						self.next_state = State.DEALING_ONE_CARD_EACH
@@ -303,19 +321,23 @@ func process_state(time_delta: float):
 					self.next_state = State.MOVING_NEST_TO_HAND
 					
 		State.MOVING_NEST_TO_HAND:
-			self.state = State.DISCARDING
+			self.next_state = State.DISCARDING
+			
 		State.DISCARDING:
-			self.state = State.WAITING_FOR_DISCARDS
-		State.WAITING_FOR_DISCARDS:
-			pass # next state set by discards_done()
+			pass
+	
 		State.STARTING_HAND:
-			self.state = State.PREPARING_FOR_NEW_TRICK
+			self.next_state = State.PREPARING_FOR_NEW_TRICK
+			
 		State.STARTING_NO_TRUMP:
-			self.state = State.PREPARING_FOR_NEW_TRICK
+			self.next_state = State.PREPARING_FOR_NEW_TRICK
+			
 		State.PREPARING_FOR_NEW_TRICK:
-			self.state = State.PLAYING
+			self.next_state = State.PLAYING
+			
 		State.PLAYING:
 			self.state = State.WAITING_FOR_PLAY
+			
 		State.WAITING_FOR_PLAY:
 			if self.trick_completed():
 				self.state = State.AWARDING_TRICK
@@ -459,11 +481,11 @@ func process_state(time_delta: float):
 		#self.actions.push_back(Action.CHECK_STATE)
 		
 
-func process_actions(time_delta: float):
-	self.think_time += time_delta
-	self.process_state(time_delta)
-	
-	return ####################################
+#func process_actions(time_delta: float):
+	#self.think_time += time_delta
+	#self.process_state(time_delta)
+	#
+	#return ####################################
 	
 	#if self.actions.is_empty():
 		#return
@@ -748,7 +770,7 @@ func get_eligible_play_cards() -> Dictionary:
 
 func eligible_card_pressed(id) -> void:
 	match self.state:
-		State.WAITING_FOR_DISCARDS:
+		State.DISCARDING:
 			var hand_card = self.find_card_in_hand(id, self.active_player)
 			if hand_card != null && self.nest.size() < 2:
 				self.move_card_to_nest(id)

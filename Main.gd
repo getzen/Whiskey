@@ -80,9 +80,8 @@ func _process(delta):
 				print("Bot plays id: ", card_id)
 				self.bot_kind = BotKind.None
 				self.game.play_card(card_id)
-				self.game.check_state()
 				
-	self.game.process_actions(delta)
+	self.game.process_state(delta)
 	
 func _on_card_created(card: Card):
 	var _node = self.view.create_card_node(card)
