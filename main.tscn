@@ -1,7 +1,8 @@
-[gd_scene load_steps=18 format=3 uid="uid://lnhvay53r0qh"]
+[gd_scene load_steps=19 format=3 uid="uid://lnhvay53r0qh"]
 
-[ext_resource type="Script" path="res://Main.gd" id="1_mk2k7"]
-[ext_resource type="Script" path="res://View.gd" id="3_de5lh"]
+[ext_resource type="Script" uid="uid://chw2vh0nd0j3f" path="res://Controller.cs" id="1_w48qg"]
+[ext_resource type="Script" uid="uid://c8thud3tpmf0h" path="res://View.cs" id="2_vivmo"]
+[ext_resource type="Script" uid="uid://b4phkqr2qyj6l" path="res://BidPanel.cs" id="3_2cqfq"]
 [ext_resource type="Texture2D" uid="uid://b3kudbql6dl1y" path="res://images/club.png" id="3_fef0g"]
 [ext_resource type="Texture2D" uid="uid://drqe3cs852u6i" path="res://images/club_mouse_over.png" id="4_7tg5b"]
 [ext_resource type="Texture2D" uid="uid://dyygc4dbvjge2" path="res://images/diamond.png" id="5_av28g"]
@@ -13,7 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://dl8wtvx3xvwoe" path="res://images/circle.png" id="11_6kwdn"]
 [ext_resource type="PackedScene" uid="uid://do8ahk1ggpbp7" path="res://outline.tscn" id="12_87ptn"]
 [ext_resource type="Texture2D" uid="uid://bbrcrktb5nym2" path="res://images/dealer_marker.png" id="13_bi12y"]
-[ext_resource type="Script" path="res://TrumpSuit.gd" id="13_e8e76"]
+[ext_resource type="Script" uid="uid://ctqfxf0aq2rxp" path="res://TrumpMarker.cs" id="14_vivmo"]
 [ext_resource type="Texture2D" uid="uid://chij8v43fgitq" path="res://images/nest_bonus.png" id="14_xenrn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_adiq0"]
@@ -22,30 +23,16 @@ bg_color = Color(0.784314, 0.784314, 0.784314, 0.784314)
 [sub_resource type="Theme" id="Theme_ssv66"]
 default_font_size = 24
 
-[node name="Main" type="Node"]
-script = ExtResource("1_mk2k7")
+[node name="Controller" type="Node"]
+script = ExtResource("1_w48qg")
 
 [node name="View" type="CanvasLayer" parent="."]
-script = ExtResource("3_de5lh")
+script = ExtResource("2_vivmo")
 
 [node name="GUI" type="CanvasLayer" parent="View"]
 
-[node name="Label" type="Label" parent="View/GUI"]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 405.0
-offset_top = 477.0
-offset_right = 500.0
-offset_bottom = 500.0
-grow_horizontal = 0
-grow_vertical = 0
-size_flags_horizontal = 4
-text = "Hello, World"
-
 [node name="StartButton" type="Button" parent="View/GUI"]
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -60,31 +47,87 @@ grow_vertical = 2
 text = "Start"
 
 [node name="BidPanel" type="Panel" parent="View/GUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -165.0
+offset_top = 173.0
+offset_right = 177.0
+offset_bottom = 289.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_adiq0")
+script = ExtResource("3_2cqfq")
+
+[node name="Label" type="Label" parent="View/GUI/BidPanel"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+offset_left = 7.0
+offset_top = 12.0
+offset_right = 334.0
+offset_bottom = 35.0
+size_flags_vertical = 0
+text = "Current bid is 100."
+horizontal_alignment = 1
+
+[node name="PassButton" type="Button" parent="View/GUI/BidPanel"]
+layout_mode = 0
+offset_left = 251.0
+offset_top = 50.0
+offset_right = 311.0
+offset_bottom = 90.0
+size_flags_horizontal = 8
+size_flags_vertical = 8
+text = "Pass"
+
+[node name="SpinBox" type="SpinBox" parent="View/GUI/BidPanel"]
+layout_mode = 1
+offset_left = 32.0
+offset_top = 50.0
+offset_right = 115.062
+offset_bottom = 90.0
+min_value = 5.0
+max_value = 180.0
+step = 5.0
+value = 100.0
+
+[node name="BidButton" type="Button" parent="View/GUI/BidPanel"]
+layout_mode = 1
+offset_left = 136.0
+offset_top = 50.0
+offset_right = 196.0
+offset_bottom = 90.0
+text = "Bid"
+
+[node name="TrumpChooser" type="Panel" parent="View/GUI"]
 visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -201.0
-offset_top = 104.0
-offset_right = 202.0
-offset_bottom = 215.0
+offset_left = -197.0
+offset_top = 165.0
+offset_right = 206.0
+offset_bottom = 277.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_adiq0")
 
-[node name="Label" type="Label" parent="View/GUI/BidPanel"]
+[node name="Label" type="Label" parent="View/GUI/TrumpChooser"]
 modulate = Color(0, 0, 0, 1)
 layout_mode = 2
 offset_left = 90.0
-offset_top = 12.0
+offset_top = 11.0
 offset_right = 307.0
-offset_bottom = 35.0
+offset_bottom = 34.0
 size_flags_vertical = 0
-text = "Choose trump suit or Pass."
+text = "Choose trump suit"
+horizontal_alignment = 1
 
-[node name="ClubButton" type="TextureButton" parent="View/GUI/BidPanel"]
+[node name="ClubButton" type="TextureButton" parent="View/GUI/TrumpChooser"]
 layout_mode = 0
 offset_left = 27.0
 offset_top = 38.0
@@ -94,7 +137,7 @@ scale = Vector2(0.2, 0.2)
 texture_normal = ExtResource("3_fef0g")
 texture_hover = ExtResource("4_7tg5b")
 
-[node name="DiamondButton" type="TextureButton" parent="View/GUI/BidPanel"]
+[node name="DiamondButton" type="TextureButton" parent="View/GUI/TrumpChooser"]
 layout_mode = 0
 offset_left = 94.0
 offset_top = 39.0
@@ -104,7 +147,7 @@ scale = Vector2(0.2, 0.2)
 texture_normal = ExtResource("5_av28g")
 texture_hover = ExtResource("6_lu8sf")
 
-[node name="HeartButton" type="TextureButton" parent="View/GUI/BidPanel"]
+[node name="HeartButton" type="TextureButton" parent="View/GUI/TrumpChooser"]
 layout_mode = 0
 offset_left = 159.0
 offset_top = 43.0
@@ -114,7 +157,7 @@ scale = Vector2(0.2, 0.2)
 texture_normal = ExtResource("7_mixwk")
 texture_hover = ExtResource("8_sk7ij")
 
-[node name="SpadeButton" type="TextureButton" parent="View/GUI/BidPanel"]
+[node name="SpadeButton" type="TextureButton" parent="View/GUI/TrumpChooser"]
 layout_mode = 0
 offset_left = 229.0
 offset_top = 41.0
@@ -123,18 +166,6 @@ offset_bottom = 301.0
 scale = Vector2(0.2, 0.2)
 texture_normal = ExtResource("9_g57yf")
 texture_hover = ExtResource("10_8fh0a")
-
-[node name="PassButton" type="Button" parent="View/GUI/BidPanel"]
-layout_mode = 0
-offset_left = 317.0
-offset_top = 43.0
-offset_right = 379.0
-offset_bottom = 90.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 8
-size_flags_vertical = 8
-text = "Pass"
 
 [node name="DiscardPanel" type="Panel" parent="View/GUI"]
 visible = false
@@ -172,39 +203,27 @@ size_flags_vertical = 8
 disabled = true
 text = "Done"
 
-[node name="PlayPanel" type="Panel" parent="View/GUI"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -86.0
-offset_top = 163.0
-offset_right = 86.0
-offset_bottom = 237.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_adiq0")
-
-[node name="Label" type="Label" parent="View/GUI/PlayPanel"]
+[node name="MessageLabel" type="Label" parent="View/GUI"]
 modulate = Color(0, 0, 0, 1)
-layout_mode = 2
-offset_left = 20.0
-offset_top = 26.0
-offset_right = 140.0
-offset_bottom = 49.0
+offset_left = 352.0
+offset_top = 355.0
+offset_right = 659.0
+offset_bottom = 378.0
 size_flags_vertical = 0
-text = "Play a card"
+text = "MessagePanel"
 horizontal_alignment = 1
 
 [node name="DiscardOutline1" parent="View/GUI" instance=ExtResource("12_87ptn")]
 visible = false
-position = Vector2(430, 500)
+position = Vector2(361, 500)
 
 [node name="DiscardOutline2" parent="View/GUI" instance=ExtResource("12_87ptn")]
 visible = false
-position = Vector2(570, 500)
+position = Vector2(501, 500)
+
+[node name="DiscardOutline3" parent="View/GUI" instance=ExtResource("12_87ptn")]
+visible = false
+position = Vector2(642, 500)
 
 [node name="ActivePlayer" type="Sprite2D" parent="View/GUI"]
 visible = false
@@ -219,65 +238,75 @@ position = Vector2(501, 959)
 scale = Vector2(0.75, 0.75)
 texture = ExtResource("13_bi12y")
 
-[node name="TrumpSuit" type="Sprite2D" parent="View/GUI"]
+[node name="TrumpMarker" type="Sprite2D" parent="View/GUI"]
+visible = false
 z_index = -1
 z_as_relative = false
 position = Vector2(500, 500)
 scale = Vector2(0.3, 0.3)
 texture = ExtResource("7_mixwk")
-script = ExtResource("13_e8e76")
+script = ExtResource("14_vivmo")
 
 [node name="PlayOutline" parent="View/GUI" instance=ExtResource("12_87ptn")]
 visible = false
 position = Vector2(500, 640)
 
 [node name="NestBonus" type="Sprite2D" parent="View/GUI"]
+visible = false
 position = Vector2(241, 150)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("14_xenrn")
 
 [node name="Score" type="Control" parent="View/GUI"]
 layout_mode = 3
-anchors_preset = 0
-offset_left = 735.0
-offset_top = 36.0
-offset_right = 775.0
-offset_bottom = 76.0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -267.0
+offset_top = 19.0
+offset_right = -267.0
+offset_bottom = 19.0
+grow_horizontal = 0
 theme = SubResource("Theme_ssv66")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="View/GUI/Score"]
 layout_mode = 0
-offset_right = 182.0
-offset_bottom = 50.0
+offset_right = 235.0
+offset_bottom = 110.0
 
 [node name="Labels" type="VBoxContainer" parent="View/GUI/Score/HBoxContainer"]
 layout_mode = 2
 
-[node name="Labels" type="Label" parent="View/GUI/Score/HBoxContainer/Labels"]
+[node name="Blank" type="Label" parent="View/GUI/Score/HBoxContainer/Labels"]
 layout_mode = 2
-text = "
-Hand
-Total"
+text = "."
+
+[node name="Hand" type="Label" parent="View/GUI/Score/HBoxContainer/Labels"]
+layout_mode = 2
+text = "Hand"
+
+[node name="Total" type="Label" parent="View/GUI/Score/HBoxContainer/Labels"]
+layout_mode = 2
+text = "Total"
 
 [node name="WeColumn" type="VBoxContainer" parent="View/GUI/Score/HBoxContainer"]
-custom_minimum_size = Vector2(75, 2.08165e-12)
+custom_minimum_size = Vector2(75, 0)
 layout_mode = 2
+size_flags_vertical = 0
 
 [node name="WeLabel" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]
 layout_mode = 2
 text = "We"
 horizontal_alignment = 2
 
-[node name="HandPoints" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]
+[node name="Hand" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]
 layout_mode = 2
-text = "0
-"
+text = "0	"
 horizontal_alignment = 2
 
-[node name="TotalPoints" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]
+[node name="Total" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]
 layout_mode = 2
-text = "0
-"
+text = "0"
 horizontal_alignment = 2
 
 [node name="TheyColumn" type="VBoxContainer" parent="View/GUI/Score/HBoxContainer"]
@@ -289,19 +318,17 @@ layout_mode = 2
 text = "They"
 horizontal_alignment = 2
 
-[node name="HandPoints" type="Label" parent="View/GUI/Score/HBoxContainer/TheyColumn"]
+[node name="Hand" type="Label" parent="View/GUI/Score/HBoxContainer/TheyColumn"]
 layout_mode = 2
-text = "0
-"
+text = "0"
 horizontal_alignment = 2
 
-[node name="TotalPoints" type="Label" parent="View/GUI/Score/HBoxContainer/TheyColumn"]
+[node name="Total" type="Label" parent="View/GUI/Score/HBoxContainer/TheyColumn"]
 layout_mode = 2
-text = "0
-"
+text = "0"
 horizontal_alignment = 2
 
-[node name="Cards" type="CanvasLayer" parent="View"]
+[node name="CardLayer" type="CanvasLayer" parent="View"]
 
 [node name="Rules" type="CanvasLayer" parent="View"]
 visible = false
@@ -394,11 +421,8 @@ offset_bottom = 42.0
 text = "Rules"
 
 [connection signal="pressed" from="View/GUI/StartButton" to="." method="_on_start_button_pressed"]
-[connection signal="pressed" from="View/GUI/BidPanel/ClubButton" to="View" method="_on_bid_button_pressed" binds= [0]]
-[connection signal="pressed" from="View/GUI/BidPanel/DiamondButton" to="View" method="_on_bid_button_pressed" binds= [1]]
-[connection signal="pressed" from="View/GUI/BidPanel/HeartButton" to="View" method="_on_bid_button_pressed" binds= [2]]
-[connection signal="pressed" from="View/GUI/BidPanel/SpadeButton" to="View" method="_on_bid_button_pressed" binds= [3]]
-[connection signal="pressed" from="View/GUI/BidPanel/PassButton" to="View" method="_on_bid_button_pressed" binds= [5]]
+[connection signal="pressed" from="View/GUI/BidPanel/PassButton" to="View" method="OnPassButton"]
+[connection signal="pressed" from="View/GUI/BidPanel/BidButton" to="View" method="OnBidButton"]
 [connection signal="pressed" from="View/GUI/DiscardPanel/DoneButton" to="." method="_on_done_button_pressed"]
 [connection signal="pressed" from="View/Rules/CloseButton" to="View" method="_on_rules_close_button_pressed"]
 [connection signal="pressed" from="View/RulesButton" to="View" method="_on_rules_button_pressed"]

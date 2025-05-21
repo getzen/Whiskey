@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://cptoh3eb2rh53"]
+
+[ext_resource type="Texture2D" uid="uid://dl8wtvx3xvwoe" path="res://images/circle.png" id="1_6p707"]
+[ext_resource type="Script" uid="uid://do3my31qsfo8a" path="res://BidMarker.cs" id="1_bbq6a"]
+[ext_resource type="Texture2D" uid="uid://c5ftcp06a5dm2" path="res://images/heart.png" id="2_q0nq0"]
+
+[node name="BidMarker" type="Node2D"]
+script = ExtResource("1_bbq6a")
+
+[node name="Circle" type="Sprite2D" parent="."]
+modulate = Color(0.960784, 0.960784, 0.960784, 1)
+texture = ExtResource("1_6p707")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -50.0
+offset_top = -46.0
+offset_right = 50.0
+offset_bottom = -1.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 32
+text = "160"
+horizontal_alignment = 1
+
+[node name="Suit" type="Sprite2D" parent="."]
+position = Vector2(0, 19)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_q0nq0")

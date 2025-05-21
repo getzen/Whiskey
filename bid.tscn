@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b2mnpoc7wjrk1"]
+
+[ext_resource type="Script" uid="uid://cpie80gbwuyao" path="res://Bid.cs" id="1_ys3oi"]
+
+[node name="Bid" type="Node"]
+script = ExtResource("1_ys3oi")

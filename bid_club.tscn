@@ -1,9 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://n0uxwhg13km2"]
-
-[ext_resource type="Texture2D" uid="uid://dw2w7vpjjnqru" path="res://images/bid_club.png" id="1_o81j4"]
-
-[node name="BidClub" type="Sprite2D"]
-visible = false
-position = Vector2(274, 497)
-scale = Vector2(0.5, 0.5)
-texture = ExtResource("1_o81j4")
