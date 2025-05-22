@@ -6,7 +6,7 @@ public enum Suit
     None, Club, Diamond, Heart, Spade, Joker,
 }
 
-public class Card
+public struct Card
 {
     public int Id;
     public Suit Suit;
@@ -31,10 +31,10 @@ public class Card
         }
     }
 
-    public Card DeepCopy() {
-        var copy = (Card)this.MemberwiseClone();
-        return copy;
-    }
+    // public Card DeepCopy() {
+    //     var copy = (Card)this.MemberwiseClone();
+    //     return copy;
+    // }
     
     public int SortOrder()
     {

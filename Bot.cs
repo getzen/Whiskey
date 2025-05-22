@@ -16,7 +16,7 @@ public class Bot
     public delegate void BotBidEventHandler(object sender, Bid bid);
     public static event BotBidEventHandler BotBid;
 
-    public delegate void BotDiscardsEventHandler(object sender, List<Card> cards);
+    public delegate void BotDiscardsEventHandler(object sender, List<int> ids);
     public static event BotDiscardsEventHandler BotDiscards;
 
     public delegate void BotTrumpSuitEventHandler(object sender, Suit suit);
@@ -52,10 +52,10 @@ public class Bot
         return bestSuit;
     }
 
-    Card LowestNonTrumpCard(List<Card> cards, Suit trumpSuit)
+    Card? LowestNonTrumpCard(List<Card> cards, Suit trumpSuit)
     {
         var lowestRank = 99;
-        Card lowestCard = null;
+        Card? lowestCard = null;
 
         foreach (var card in cards)
         {
@@ -80,7 +80,7 @@ public class Bot
         var minBid = gameCopy.MinCurrentBid();
         var maxBid = gameCopy.PointsInHand;
 
-        var hand = gameCopy.ActiveHand();
+        var hand = gameCopy.Players[gameCopy.Active].Hand;
 
         /////////////////////////////// 0  1  2  3  4  5  6  7  8  9 10 11 12  13  14  15
         var rankValues = new List<int>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 15, 20]);
@@ -117,11 +117,11 @@ public class Bot
         BotDiscards?.Invoke(this, discards);
     }
 
-    List<Card> ChooseDiscardsSimple(Game gameCopy)
+    List<int> ChooseDiscardsSimple(Game gameCopy)
     {
-        var hand = gameCopy.ActiveHand();
+        List<Card> hand = [.. gameCopy.Players[gameCopy.Active].Hand];
         var trumpSuit = gameCopy.TrumpSuit;
-        var discards = new List<Card>();
+        var discards = new List<int>();
 
         while (discards.Count < gameCopy.Settings.ExchangeSize)
         {
@@ -130,8 +130,8 @@ public class Bot
             // a Game copy. LowestNonTrumpCard skips ineligibles.
             if (lowestCard is Card card)
             {
-                card.Eligible = 0;
-                discards.Add(card);
+                hand.Remove(card);
+                discards.Add(card.Id);
             }
         }
         return discards;
@@ -139,7 +139,7 @@ public class Bot
 
     public void ChooseTrumpSuit(Game gameCopy)
     {
-        var hand = gameCopy.ActiveHand();
+        var hand = gameCopy.Players[gameCopy.Active].Hand;
         GD.Print("Choosing Trump, active: ", gameCopy.Active);
         var trumpSuit = StrongestSuit(hand);
         BotTrumpSuit?.Invoke(this, trumpSuit);
@@ -202,7 +202,6 @@ public class Bot
             for (var i = 0; i < simulations; i++)
             {
                 var simGame = gameCopy.DeepCopy();
-
                 // Assign random cards to all players but the active player.
                 hiddenCards.Shuffle();
                 var hiddenIdx = 0;
@@ -210,6 +209,8 @@ public class Bot
                 for (var p = 0; p < gameCopy.PlayerCount; p++)
                 {
                     if (p == montePlayer) continue;
+
+                    //GD.Print("Player: ", p, ", hand count: ", simGame.Players[p].Hand.Count);
 
                     for (var j = 0; j < playerHandCounts[p]; j++)
                     {
@@ -266,7 +267,8 @@ public class Bot
         TimeSpan ts = stopWatch.Elapsed;
         string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
         ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
-        GD.Print($"sims: {simulations}, ms: {ts.Milliseconds}");
+        var time = ts.Milliseconds / montePlayableIds.Count;
+        GD.Print($"sims: {simulations}, ms: {ts.Milliseconds} ms/eligible: {time}");
 
         return bestCardId;
     }

@@ -216,10 +216,10 @@ public partial class View : CanvasLayer
         for (var i = 0; i < cards.Count; i++)
         {
             var card = cards[i];
-            if (card != null)
+            if (card.HasValue)
             {
                 var geom = ViewGeom.TrickCardGeom(i, game.PlayerCount);
-                UpdateCard(card, geom);
+                UpdateCard(card.Value, geom);
             }
         }
     }

@@ -28,16 +28,8 @@ public class Player
     {
         var copy = (Player)this.MemberwiseClone();
 
-        copy.Hand = [];
-        foreach (var card in Hand)
-        {
-            copy.Hand.Add(card.DeepCopy());
-        }
-        copy.Taken = [];
-        foreach (var card in Taken)
-        {
-            copy.Taken.Add(card.DeepCopy());
-        }
+        copy.Hand = [..Hand];
+        copy.Taken = [..Taken];
         return copy;
     }
 
