@@ -264,9 +264,8 @@ public class Bot
 
         stopWatch.Stop();
         TimeSpan ts = stopWatch.Elapsed;
-        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
-        ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
-        GD.Print($"sims: {simulations}, ms: {ts.Milliseconds}");
+        var perEligible = ts.Milliseconds / montePlayableIds.Count;
+        GD.Print($"sims: {simulations}, ms: {ts.Milliseconds}, per eligible: {perEligible}");
 
         return bestCardId;
     }
