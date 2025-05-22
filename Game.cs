@@ -54,16 +54,31 @@ public class Game
 
 		var copy = (Game)this.MemberwiseClone();
 
-		copy.Deck = [..Deck];
-		copy.Exchange = [..Exchange];
-		copy.Nest = [..Nest];
-
+		// The '[]' creates a new list, which we need.
+		// It's not the same as copy.Deck.Clear().
+		copy.Deck = [];
+		foreach (var card in Deck)
+		{
+			copy.Deck.Add(card.DeepCopy());
+		}
+		copy.Exchange = [];
+		foreach (var card in Exchange)
+		{
+			copy.Exchange.Add(card.DeepCopy());
+		}
+		copy.Nest = [];
+		foreach (var card in Nest)
+		{
+			copy.Nest.Add(card.DeepCopy());
+		}
 		copy.Players = [];
 		foreach (var player in Players)
 		{
 			copy.Players.Add(player.DeepCopy());
 		}
 		copy.Trick = Trick.DeepCopy();
+
+
 
 		return copy;
 	}
@@ -73,10 +88,10 @@ public class Game
 		return Players[Active].IsBot;
 	}
 
-	// public List<Card> ActiveHand()
-	// {
-	// 	return Players[Active].Hand;
-	// }
+	public List<Card> ActiveHand()
+	{
+		return Players[Active].Hand;
+	}
 
 	public void NextPlayer()
 	{
@@ -135,11 +150,10 @@ public class Game
 
 		Deck.AddRange(Nest);
 
-		for (var i = 0; i < Deck.Count; i++)
+		foreach (Card card in Deck)
 		{
-			Deck[i] = Deck[i] with { FaceUp = false };
+			card.FaceUp = false;
 		}
-
 		SetJokerSuit(Deck, Suit.Joker);
 		Deck.Shuffle();
 
@@ -157,11 +171,9 @@ public class Game
 
 	void SetJokerSuit(List<Card> cards, Suit suit)
 	{
-		for (var i = 0; i < cards.Count; i++)
+		foreach (Card card in cards)
 		{
-			var card = cards[i];
 			if (card.IsJoker) card.Suit = suit;
-			cards[i] = card;
 		}
 	}
 
@@ -180,7 +192,7 @@ public class Game
 		var card = Deck.Pop();
 		//card.FaceUp = !ActiveIsBot(); /////////////////
 		card.FaceUp = true;
-		Players[Active].Hand.Add(card);
+		ActiveHand().Add(card);
 		if (!ActiveIsBot())
 		{
 			SortHand(Active);
@@ -208,7 +220,8 @@ public class Game
 
 	public void SortHand(int p)
 	{
-		Players[p].Hand.Sort((x, y) => x.SortOrder().CompareTo(y.SortOrder()));
+		var hand = Players[p].Hand;
+		hand.Sort((x, y) => x.SortOrder().CompareTo(y.SortOrder()));
 	}
 
 	public int MinCurrentBid()
@@ -311,44 +324,41 @@ public class Game
 		// See Rust version for different options.
 
 		// All cards are eligible except the joker.
-		for (var i = 0; i < Players[Active].Hand.Count; i++)
+		foreach (var card in Players[Maker].Hand)
 		{
-			var card = Players[Active].Hand[i];
 			card.Eligible = card.IsJoker ? 0 : 1;
-			Players[Active].Hand[i] = card;
 		}
 	}
 
 	public bool IsExchangeFull()
 	{
-		return Exchange.Count == Settings.ExchangeSize;
+		return Exchange.Count == 3; // TODO: exchange size
 	}
 
 	public void SwapWithExchange(int id)
 	{
+		var hand = Players[Maker].Hand;
 		var idx = 0;
 		// Check if hand card.
-		idx = Players[Maker].Hand.FindIndex(card => card.Id == id);
+		idx = hand.FindIndex(card => card.Id == id);
 		if (idx != -1)
 		{
-			GD.Print("adding card to exchange");
 			if (!IsExchangeFull())
 			{
-				var card = Players[Maker].Hand[idx];
-				Players[Maker].Hand.RemoveAt(idx);
+				var card = hand[idx];
+				hand.RemoveAt(idx);
 				Exchange.Add(card);
-
 			}
+
 		}
 		else
 		{
-			GD.Print("********** could not find id: ", id);
 			idx = Exchange.FindIndex(card => card.Id == id);
 			if (idx != -1)
 			{
 				var card = Exchange[idx];
 				Exchange.RemoveAt(idx);
-				Players[Maker].Hand.Add(card);
+				hand.Add(card);
 				SortHand(Maker);
 			}
 		}
@@ -375,7 +385,7 @@ public class Game
 	{
 		if (Trick.LeadCard is Card leadCard)
 		{
-			foreach (var card in Players[Active].Hand)
+			foreach (var card in ActiveHand())
 			{
 				if (card.Suit == leadCard.Suit)
 				{
@@ -395,9 +405,8 @@ public class Game
 
 		var leadCard = Trick.LeadCard;
 
-		for (var i = 0; i < Players[Active].Hand.Count; i++)
+		foreach (var card in ActiveHand())
 		{
-			var card = Players[Active].Hand[i];
 			var eligible = 0;
 
 			// Is this the first card to play or there are no matching cards in hand?
@@ -406,29 +415,29 @@ public class Game
 				eligible = 1;
 			}
 			// Not the first card in play.
-			else if (leadCard.HasValue)
+			else if (leadCard != null && card.Suit == leadCard.Suit)
 			{
-				if (leadCard.Value.Suit == card.Suit) eligible = 1;
+				eligible = 1;
 			}
 
 			if (eligible == 1) eligibleIds.Add(card.Id);
 			card.Eligible = eligible;
-			Players[Active].Hand[i] = card;
-
 		}
 		return eligibleIds;
 	}
 
 	public void PlayCardId(int id)
 	{
-		var idx = Players[Active].Hand.FindIndex(card => card.Id == id);
+		var hand = ActiveHand();
+		var idx = hand.FindIndex(card => card.Id == id);
 		if (idx == -1)
 		{
 			GD.Print("******************************** Can't find id ", id);
 			return;
 		}
-		var card = Players[Active].Hand[idx];
-		Players[Active].Hand.RemoveAt(idx);
+		var card = hand[idx];
+		hand.RemoveAt(idx);
+		// var card = ActiveHand().RemoveAndReturnAt(idx);
 		card.FaceUp = true;
 		Trick.Add(Active, card, TrumpSuit);
 		NextPlayer();
@@ -436,9 +445,9 @@ public class Game
 
 	public void ResetHandEligibility(int p)
 	{
-		for (var i = 0; i < Players[p].Hand.Count; i++)
+		foreach (var card in Players[p].Hand)
 		{
-			Players[p].Hand[i] = Players[p].Hand[i] with { Eligible = 1 };
+			card.Eligible = -1;
 		}
 	}
 
@@ -448,11 +457,14 @@ public class Game
 		Players[LastTrickWinner].HandPoints += Trick.Points;
 		foreach (var card in Trick.Cards)
 		{
-			if (card.HasValue)
+			if (card != null)
 			{
-				var cardCopy = card.Value;
-				cardCopy.FaceUp = false;
-				Players[LastTrickWinner].Taken.Add(cardCopy);
+				//card.FaceUp = false;
+				Players[LastTrickWinner].Taken.Add(card);
+			}
+			else
+			{
+				GD.Print("Card is null ***");
 			}
 		}
 	}
@@ -471,10 +483,10 @@ public class Game
 	public int AwardNestCards()
 	{
 		var points = 0;
-		for (var i = 0; i < Nest.Count; i++)
+		foreach (var card in Nest)
 		{
-			points += Nest[i].Points;
-			Nest[i] = Nest[i] with { FaceUp = true };
+			card.FaceUp = true;
+			points += card.Points;
 		}
 		Players[LastTrickWinner].HandPoints += points;
 		return points;

@@ -5,8 +5,8 @@ public class Trick
 {
     int PlayerCount;
     int CardsPlayed = 0;
-    public List<Card?> Cards = [];
-    public Card? LeadCard;
+    public List<Card> Cards = [];
+    public Card LeadCard;
     public int Winner = -1;
     public int Points;
 
@@ -22,7 +22,23 @@ public class Trick
     public Trick DeepCopy()
     {
         var copy = (Trick)this.MemberwiseClone();
-        copy.Cards = [..Cards];
+        
+        copy.Cards = [];
+        foreach (var card in Cards)
+        {
+            if (card != null)
+            {
+                copy.Cards.Add(card.DeepCopy());
+            }
+            else
+            {
+                copy.Cards.Add(null);
+            }
+        }
+        if (LeadCard != null)
+        {
+            copy.LeadCard = LeadCard.DeepCopy();
+        }
         return copy;
     }
 

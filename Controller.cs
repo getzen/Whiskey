@@ -36,6 +36,7 @@ public partial class Controller : Node
 
     public Controller()
     {
+        GD.Print("Controller constructor.");
     }
 
     public override void _Ready()
@@ -74,7 +75,7 @@ public partial class Controller : Node
     {
         if (NextAction is null) return;
 
-        //GD.Print($"Action: {NextAction}");
+        GD.Print($"Action: {NextAction}");
 
         switch (NextAction)
         {
@@ -293,6 +294,7 @@ public partial class Controller : Node
 
             case GameAction.PlayCard:
                 var player = Game.Active;
+                hand = Game.ActiveHand();
                 View.UpdateHand(Game, player);
                 View.UpdateTrick(Game);
                 View.UpdateMessage("");
@@ -396,12 +398,12 @@ public partial class Controller : Node
         });
     }
 
-    void OnBotDiscards(object sender, List<int> discards)
+    void OnBotDiscards(object sender, List<Card> discards)
     {
-        GD.Print("OnBotDiscards, count: ", discards.Count);
-        foreach (var id in discards)
+        GD.Print("OnBotDiscards");
+        foreach (var card in discards)
         {
-            Game.SwapWithExchange(id);
+            Game.SwapWithExchange(card.Id);
         }
         NextAction = GameAction.Discard;
     }
