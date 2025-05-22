@@ -303,8 +303,9 @@ public partial class View : CanvasLayer
     {
         GD.Print("OnBidButtonPressed");
         var bid = new Bid();
+        bid.Kind = BidKind.Points;
         bid.Points = bidPanel.BidValue();
-        bid.Suit = Suit.Club;
+        bid.Suit = Suit.None;
         HumanBidMade.Invoke(this, bid);
     }
 
@@ -333,15 +334,7 @@ public partial class View : CanvasLayer
 
     }
 
-    internal void HideDoneExchangingButton()
-    {
-        
-    }
-
-    internal void ShowDoneExchangingButton(object value)
-    {
-        
-    }
+   
 
     internal void GetBotDiscards(Game game)
     {
@@ -350,7 +343,18 @@ public partial class View : CanvasLayer
 
     internal void GetHumanExchanges(Game game)
     {
-        //
+        var count = game.Settings.ExchangeSize;
+        messageLabel.Text = $"Exchange {count} cards.";
+    }
+
+     internal void HideDoneExchangingButton()
+    {
+        
+    }
+
+    internal void ShowDoneExchangingButton(object value)
+    {
+        
     }
 
     internal void SetDiscardableHandCards(Game game)

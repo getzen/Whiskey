@@ -273,12 +273,12 @@ public class Game
 		{
 			switch (player.Bid.Kind)
 			{
+				case BidKind.None: return false;
 				case BidKind.Pass: passes += 1; break;
 				case BidKind.Points: bids += 1; break;
-				default: break;
 			}
 		}
-		return bids == 1 && (bids + passes) == PlayerCount;
+		return bids == 1;
 	}
 
 	public void EndBidding()
@@ -332,7 +332,7 @@ public class Game
 
 	public bool IsExchangeFull()
 	{
-		return Exchange.Count == 3; // TODO: exchange size
+		return Exchange.Count == Settings.ExchangeSize;
 	}
 
 	public void SwapWithExchange(int id)

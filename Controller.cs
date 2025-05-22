@@ -47,13 +47,15 @@ public partial class Controller : Node
         DelayBeforeNextAction = 1.0;
 
         // Subscribe to events.
-        View.CardClicked += OnPlayCard;
+        // This one is set during HandleStateLogic:
+        // View.CardClicked +=...;
+
         View.HumanBidMade += OnHumanBid;
 
         Bot.BotBid += OnBotBid;
         Bot.BotDiscards += OnBotDiscards;
         Bot.BotTrumpSuit += OnBotTrumpSuit;
-        Bot.BotPlayCard += OnPlayCard;
+        Bot.BotPlayCard += OnBotCardPlayed;
 
         // var timer = new Timer();
         // timer.Autostart = true;
@@ -212,6 +214,7 @@ public partial class Controller : Node
                 }
                 else
                 {
+                    View.CardClicked += OnHumanCardExchanged;
                     View.GetHumanExchanges(Game);
                 }
                 DelayBeforeNextAction = 1.0;
@@ -239,6 +242,7 @@ public partial class Controller : Node
                 Game.ResetHandEligibility(Game.Active);
                 Game.MoveExchangeToNest();
 
+                View.CardClicked -= OnHumanCardExchanged;
                 var hand = Game.Players[Game.Maker].Hand;
                 View.ResetEligibility(hand);
                 View.ResetEligibility(Game.Nest);
@@ -288,6 +292,7 @@ public partial class Controller : Node
                 else
                 {
                     Game.GetPlayableCardIds();
+                    View.CardClicked += OnHumanCardPlayed;
                     View.GetHumanCardPlay(Game);
                 }
                 break;
@@ -295,6 +300,7 @@ public partial class Controller : Node
             case GameAction.PlayCard:
                 var player = Game.Active;
                 hand = Game.ActiveHand();
+
                 View.UpdateHand(Game, player);
                 View.UpdateTrick(Game);
                 View.UpdateMessage("");
@@ -377,7 +383,7 @@ public partial class Controller : Node
         GD.Print("OnBotBid: ", bid.Points);
         Game.MakeBid(bid);
         NextAction = GameAction.BidMade;
-        DelayBeforeNextAction = 0.5;
+        DelayBeforeNextAction = 0.2;
     }
 
     void OnHumanBid(object sender, Bid bid) // from View
@@ -436,7 +442,23 @@ public partial class Controller : Node
         });
     }
 
-    void OnPlayCard(object sender, int cardId)
+    void OnHumanCardExchanged(object sender, int cardId)
+    {
+        GD.Print("OnHumanCardExchanged");
+        Game.SwapWithExchange(cardId);
+        NextAction = GameAction.Exchange;
+    }
+
+    void OnHumanCardPlayed(object sender, int cardId)
+    {
+        Game.ResetHandEligibility(Game.Active);
+        Game.PlayCardId(cardId);
+
+        View.CardClicked -= OnHumanCardPlayed;
+        NextAction = GameAction.PlayCard;
+    }
+
+    void OnBotCardPlayed(object sender, int cardId)
     {
         Game.ResetHandEligibility(Game.Active);
         Game.PlayCardId(cardId);
