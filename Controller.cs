@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 public enum GameAction
@@ -19,7 +20,7 @@ public enum GameAction
     Discard,
     EndExchanging,
     GetTrump,
-    ChooseTrump,
+    TrumpChosen,
     GetCardPlay,
     PlayCard,
     AwardTrick,
@@ -51,6 +52,8 @@ public partial class Controller : Node
         // View.CardClicked +=...;
 
         View.HumanBidMade += OnHumanBid;
+
+        TrumpChooser.SuitClicked += OnSuitClicked;
 
         Bot.BotBid += OnBotBid;
         Bot.BotDiscards += OnBotDiscards;
@@ -246,7 +249,7 @@ public partial class Controller : Node
                 var hand = Game.Players[Game.Maker].Hand;
                 View.ResetEligibility(hand);
                 View.ResetEligibility(Game.Nest);
-                View.HideDoneExchangingButton();
+                View.ShowDoneExchangingButton(false);
                 View.UpdateExchange(Game);
                 View.UpdateNest(Game, true);
 
@@ -267,7 +270,7 @@ public partial class Controller : Node
                 NextAction = null;
                 break;
 
-            case GameAction.ChooseTrump:
+            case GameAction.TrumpChosen:
                 Game.SetFirstPlayer();
 
                 View.UpdateInfo(Game);
@@ -428,7 +431,13 @@ public partial class Controller : Node
     {
         GD.Print("OnBotTrumpSuit: ", suit);
         Game.SetTrumpSuit(suit);
-        NextAction = GameAction.ChooseTrump;
+        NextAction = GameAction.TrumpChosen;
+    }
+
+    private void OnSuitClicked(object sender, Suit suit)
+    {
+        Game.SetTrumpSuit(suit);
+        NextAction = GameAction.TrumpChosen;
     }
 
     private void SpawnPlayBot()
@@ -447,6 +456,12 @@ public partial class Controller : Node
         GD.Print("OnHumanCardExchanged");
         Game.SwapWithExchange(cardId);
         NextAction = GameAction.Exchange;
+    }
+
+    void OnDoneButtonPressed()
+    {
+        GD.Print("OnDoneButtonPressed");
+        NextAction = GameAction.EndExchanging;
     }
 
     void OnHumanCardPlayed(object sender, int cardId)

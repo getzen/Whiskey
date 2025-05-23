@@ -11,6 +11,7 @@ public partial class View : CanvasLayer
     Panel trumpChooser;
     TrumpMarker trumpMarker;
     Label messageLabel;
+    Button doneButton;
 
     // Holds a ref to the card nodes for easy searching.
     List<CardNode> cardNodes = [];
@@ -42,10 +43,16 @@ public partial class View : CanvasLayer
         bidPanel.Visible = false;
 
         trumpChooser = GetNode<Panel>("GUI/TrumpChooser");
+        trumpChooser.Visible = false;
+
         trumpMarker = GetNode<TrumpMarker>("GUI/TrumpMarker");
+        trumpMarker.Visible = false;
 
         messageLabel = GetNode<Label>("GUI/MessageLabel");
         messageLabel.Visible = false;
+
+        doneButton = GetNode<Button>("GUI/DoneButton");
+        doneButton.Visible = false;
 
         // BidMarkers will be created when needed.
 
@@ -347,14 +354,9 @@ public partial class View : CanvasLayer
         messageLabel.Text = $"Exchange {count} cards.";
     }
 
-     internal void HideDoneExchangingButton()
+    internal void ShowDoneExchangingButton(bool visible)
     {
-        
-    }
-
-    internal void ShowDoneExchangingButton(object value)
-    {
-        
+         doneButton.Visible = visible;
     }
 
     internal void SetDiscardableHandCards(Game game)

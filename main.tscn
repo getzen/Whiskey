@@ -1,10 +1,11 @@
-[gd_scene load_steps=19 format=3 uid="uid://lnhvay53r0qh"]
+[gd_scene load_steps=20 format=3 uid="uid://lnhvay53r0qh"]
 
 [ext_resource type="Script" uid="uid://chw2vh0nd0j3f" path="res://Controller.cs" id="1_w48qg"]
 [ext_resource type="Script" uid="uid://c8thud3tpmf0h" path="res://View.cs" id="2_vivmo"]
 [ext_resource type="Script" uid="uid://b4phkqr2qyj6l" path="res://BidPanel.cs" id="3_2cqfq"]
 [ext_resource type="Texture2D" uid="uid://b3kudbql6dl1y" path="res://images/club.png" id="3_fef0g"]
 [ext_resource type="Texture2D" uid="uid://drqe3cs852u6i" path="res://images/club_mouse_over.png" id="4_7tg5b"]
+[ext_resource type="Script" uid="uid://o8i0t5nffx8r" path="res://TrumpChooser.cs" id="4_yaehf"]
 [ext_resource type="Texture2D" uid="uid://dyygc4dbvjge2" path="res://images/diamond.png" id="5_av28g"]
 [ext_resource type="Texture2D" uid="uid://dqpox6yhfj7wd" path="res://images/diamond_mouse_over.png" id="6_lu8sf"]
 [ext_resource type="Texture2D" uid="uid://c5ftcp06a5dm2" path="res://images/heart.png" id="7_mixwk"]
@@ -45,6 +46,20 @@ offset_bottom = 149.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Start"
+
+[node name="DoneButton" type="Button" parent="View/GUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -71.0
+offset_top = 77.0
+offset_right = 70.0
+offset_bottom = 108.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Done Exchanging"
 
 [node name="BidPanel" type="Panel" parent="View/GUI"]
 anchors_preset = 8
@@ -102,26 +117,26 @@ offset_bottom = 90.0
 text = "Bid"
 
 [node name="TrumpChooser" type="Panel" parent="View/GUI"]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -197.0
-offset_top = 165.0
-offset_right = 206.0
-offset_bottom = 277.0
+offset_left = -156.0
+offset_top = -60.0
+offset_right = 154.0
+offset_bottom = 52.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_adiq0")
+script = ExtResource("4_yaehf")
 
 [node name="Label" type="Label" parent="View/GUI/TrumpChooser"]
 modulate = Color(0, 0, 0, 1)
 layout_mode = 2
-offset_left = 90.0
+offset_left = 7.0
 offset_top = 11.0
-offset_right = 307.0
+offset_right = 304.0
 offset_bottom = 34.0
 size_flags_vertical = 0
 text = "Choose trump suit"
@@ -421,6 +436,7 @@ offset_bottom = 42.0
 text = "Rules"
 
 [connection signal="pressed" from="View/GUI/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="View/GUI/DoneButton" to="." method="OnDoneButtonPressed"]
 [connection signal="pressed" from="View/GUI/BidPanel/PassButton" to="View" method="OnPassButton"]
 [connection signal="pressed" from="View/GUI/BidPanel/BidButton" to="View" method="OnBidButton"]
 [connection signal="pressed" from="View/GUI/DiscardPanel/DoneButton" to="." method="_on_done_button_pressed"]
