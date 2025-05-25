@@ -272,74 +272,82 @@ position = Vector2(241, 150)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("14_xenrn")
 
-[node name="Score" type="Control" parent="View/GUI"]
+[node name="ScoreTable" type="Control" parent="View/GUI"]
 layout_mode = 3
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -267.0
-offset_top = 19.0
-offset_right = -267.0
-offset_bottom = 19.0
+offset_left = -256.0
+offset_top = 14.0
+offset_right = -256.0
+offset_bottom = 14.0
 grow_horizontal = 0
 theme = SubResource("Theme_ssv66")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="View/GUI/Score"]
+[node name="HBoxContainer" type="HBoxContainer" parent="View/GUI/ScoreTable"]
 layout_mode = 0
 offset_right = 235.0
 offset_bottom = 110.0
 
-[node name="Labels" type="VBoxContainer" parent="View/GUI/Score/HBoxContainer"]
+[node name="Labels" type="VBoxContainer" parent="View/GUI/ScoreTable/HBoxContainer"]
 layout_mode = 2
 
-[node name="Blank" type="Label" parent="View/GUI/Score/HBoxContainer/Labels"]
+[node name="Blank" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/Labels"]
 layout_mode = 2
-text = "."
+theme_override_font_sizes/font_size = 20
 
-[node name="Hand" type="Label" parent="View/GUI/Score/HBoxContainer/Labels"]
+[node name="Hand" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/Labels"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "Hand"
 
-[node name="Total" type="Label" parent="View/GUI/Score/HBoxContainer/Labels"]
+[node name="Total" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/Labels"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "Total"
 
-[node name="WeColumn" type="VBoxContainer" parent="View/GUI/Score/HBoxContainer"]
+[node name="WeColumn" type="VBoxContainer" parent="View/GUI/ScoreTable/HBoxContainer"]
 custom_minimum_size = Vector2(75, 0)
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="WeLabel" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]
+[node name="WeLabel" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/WeColumn"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "We"
 horizontal_alignment = 2
 
-[node name="Hand" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]
+[node name="Hand" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/WeColumn"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "0	"
 horizontal_alignment = 2
 
-[node name="Total" type="Label" parent="View/GUI/Score/HBoxContainer/WeColumn"]
+[node name="Total" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/WeColumn"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "0"
 horizontal_alignment = 2
 
-[node name="TheyColumn" type="VBoxContainer" parent="View/GUI/Score/HBoxContainer"]
+[node name="TheyColumn" type="VBoxContainer" parent="View/GUI/ScoreTable/HBoxContainer"]
 custom_minimum_size = Vector2(90, 2.08165e-12)
 layout_mode = 2
 
-[node name="TheyLabel" type="Label" parent="View/GUI/Score/HBoxContainer/TheyColumn"]
+[node name="TheyLabel" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/TheyColumn"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "They"
 horizontal_alignment = 2
 
-[node name="Hand" type="Label" parent="View/GUI/Score/HBoxContainer/TheyColumn"]
+[node name="Hand" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/TheyColumn"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "0"
 horizontal_alignment = 2
 
-[node name="Total" type="Label" parent="View/GUI/Score/HBoxContainer/TheyColumn"]
+[node name="Total" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/TheyColumn"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "0"
 horizontal_alignment = 2
 

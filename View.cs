@@ -6,6 +6,7 @@ using Godot;
 public partial class View : CanvasLayer
 {
     Sprite2D activePlayer;
+    Control scoreTable;
     BidPanel bidPanel;
     List<BidMarker> bidMarkers = [];
     Panel trumpChooser;
@@ -38,6 +39,8 @@ public partial class View : CanvasLayer
 
         GD.Print("View _Ready");
         activePlayer = GetNode<Sprite2D>("GUI/ActivePlayer");
+
+        scoreTable = GetNode<Control>("GUI/ScoreTable");
 
         bidPanel = GetNode<BidPanel>("GUI/BidPanel");
         bidPanel.Visible = false;
@@ -124,7 +127,11 @@ public partial class View : CanvasLayer
         activePlayer.Position = geom.Pos;
 
         // score table
+        var weHand = GetNode<Label>("GUI/ScoreTable/HBoxContainer/WeColumn/Hand");
+        weHand.Text = game.WeHandScore.ToString();
 
+        var theyHand = GetNode<Label>("GUI/ScoreTable/HBoxContainer/TheyColumn/Hand");
+        theyHand.Text = game.TheyHandScore.ToString();
     }
 
     internal void UpdateMessage(string message)

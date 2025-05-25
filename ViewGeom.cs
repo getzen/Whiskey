@@ -14,13 +14,12 @@ public static class Constants
 
     public static readonly Vector2 NEST_EXCHANGE_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y - 30f);
     public static readonly Vector2 NEST_ASIDE_POS = new Vector2(PLAY_TOP_LEFT.X + 90f, PLAY_BOTTOM_RIGHT.Y - 120f);
-    public static readonly Vector2 MESSAGE_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 110f);
-    public static readonly Vector2 SCORE_TABLE_POS = new Vector2(10f, 10f);
-    // public static readonly Vector2 PLAY_BUTTON_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 100f);
-    public static readonly Vector2 BID_PANEL_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 220f);
-    public static readonly Vector2 DONE_EXCHANGING_BUTTON_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 60f);
-    public static readonly Vector2 NEXT_HAND_BUTTON_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 200f);
-    public static readonly Vector2 TRUMP_CHOOSER_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 70f);
+    //public static readonly Vector2 MESSAGE_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 110f);
+    //public static readonly Vector2 SCORE_TABLE_POS = new Vector2(10f, 10f);
+    //public static readonly Vector2 BID_PANEL_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 220f);
+    //public static readonly Vector2 DONE_EXCHANGING_BUTTON_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 60f);
+    //public static readonly Vector2 NEXT_HAND_BUTTON_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 200f);
+    //public static readonly Vector2 TRUMP_CHOOSER_POS = new Vector2(PLAY_CENTER.X, PLAY_CENTER.Y + 70f);
 
     public const float CARD_SPEED = 800f;
     public const float ROT_SPEED = 10f;
@@ -42,7 +41,6 @@ public struct ViewGeom
         Z = z;
     }
 
-    // Equivalent to Rust's Default trait
     public static ViewGeom Default => new ViewGeom(Vector2.Zero, 0f, 0);
     
     public static ViewGeom TurnMarkerGeom(int player, int playerCount)
@@ -148,7 +146,7 @@ public struct ViewGeom
     public static ViewGeom HandCardGeom(int player, int index, int handCount, int playerCount, bool isBot)
     {
         const float distanceFromCenter = 400f;
-        float maxWidth = isBot ? 500f : 530f; // 300f : 530f
+        float maxWidth = isBot ? 350f : 530f;
         const float maxSpacing = 60f;
 
         float computedWidth = maxWidth / handCount;

@@ -17,20 +17,20 @@ public partial class BidMarker : Node2D
         {
             text = bid.Points.ToString();
 
-            var path = "res://images/";
-            path += bid.Suit switch
-            {
-                Suit.Club => "club.png",
-                Suit.Diamond => "diamond.png",
-                Suit.Heart => "heart.png",
-                Suit.Spade => "spade.png",
-                Suit.None => "circle.png",
-                _ => throw new Exception(""),
-            };
-            texture = GD.Load<Texture2D>(path);
+            // var path = "res://images/";
+            // path += bid.Suit switch
+            // {
+            //     Suit.Club => "club.png",
+            //     Suit.Diamond => "diamond.png",
+            //     Suit.Heart => "heart.png",
+            //     Suit.Spade => "spade.png",
+            //     Suit.None => "circle.png",
+            //     _ => throw new Exception(""),
+            // };
+            // texture = GD.Load<Texture2D>(path);
         }
 
         GetNode<Label>("Label").Text = text;
-        GetNode<Sprite2D>("Suit").Texture = texture;
+        //GetNode<Sprite2D>("Suit").Texture = texture;
     }
 }
