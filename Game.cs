@@ -7,10 +7,12 @@ public class Game
 	public GameSettings Settings;
 	public int PlayerCount;
 
-	public int WeHandScore;
-	public int TheyHandScore;
-	public int WeGameScore;
-	public int TheyGameScore;
+	public Scoring Scoring = new Scoring(300);
+
+	// public int WeHandScore;
+	// public int TheyHandScore;
+	// public int WeGameScore;
+	// public int TheyGameScore;
 
 	public List<Card> Deck = [];
 	public List<Card> Exchange = [];
@@ -53,6 +55,8 @@ public class Game
 
 		var copy = (Game)this.MemberwiseClone();
 
+		copy.Scoring = Scoring.DeepCopy();
+
 		// The '[]' creates a new list, which we need.
 		// It's not the same as copy.Deck.Clear().
 		copy.Deck = [];
@@ -76,8 +80,6 @@ public class Game
 			copy.Players.Add(player.DeepCopy());
 		}
 		copy.Trick = Trick.DeepCopy();
-
-
 
 		return copy;
 	}
@@ -439,7 +441,6 @@ public class Game
 		// var card = ActiveHand().RemoveAndReturnAt(idx);
 		card.FaceUp = true;
 		Trick.Add(Active, card, TrumpSuit);
-		NextPlayer();
 	}
 
 	public void ResetHandEligibility(int p)
@@ -453,13 +454,14 @@ public class Game
 	public void AwardTrick()
 	{
 		LastTrickWinner = Trick.Winner;
-		Players[LastTrickWinner].HandPoints += Trick.Points;
+		Scoring.AwardTrickPts(Trick.Points, Trick.Winner);
+
 		foreach (var card in Trick.Cards)
 		{
 			if (card != null)
 			{
-				//card.FaceUp = false;
-				Players[LastTrickWinner].Taken.Add(card);
+				card.FaceUp = false;
+				Players[Trick.Winner].Taken.Add(card);
 			}
 			else
 			{
@@ -487,64 +489,48 @@ public class Game
 			card.FaceUp = true;
 			points += card.Points;
 		}
-		Players[LastTrickWinner].HandPoints += points;
+		Scoring.AwardNestPts(points, LastTrickWinner);
 		return points;
 	}
 
 	public void CompleteHand()
 	{
-		var makersPoints = 0;
-		var defendersPoints = 0;
-
-		for (var p = 0; p < PlayerCount; p++)
-		{
-			if (Players[p].Team == TeamKind.Makers)
-			{
-				makersPoints += Players[p].HandPoints;
-			}
-			else
-			{
-				defendersPoints += Players[p].HandPoints;
-			}
-		}
-
-
-
 		var theBid = Players[Maker].Bid.Points;
 
-		if (makersPoints >= theBid)
+		var bidders = Maker switch
+		{
+			0 => (0, 2),
+			1 => (1, 3),
+			2 => (0, 2),
+			3 => (1, 3),
+			_ => (-1, -1),
+		};
+		var bidderPts = Scoring.CombinedHandScoreFor(bidders.Item1, bidders.Item2);
+
+		var defenders = bidders switch
+		{
+			(0, 2) => (1, 3),
+			(1, 3) => (0, 2),
+			_ => (-1, -1),
+		};
+		var defenderPts = Scoring.CombinedHandScoreFor(defenders.Item1, defenders.Item2);
+
+		if (bidderPts >= theBid)
 		{
 			// Bid success
-			switch (Maker)
-			{
-				case 0:
-				case 2:
-					WeHandScore += theBid;
-					TheyHandScore += defendersPoints / 2;
-					break;
-				case 1:
-				case 3:
-					TheyHandScore += theBid;
-					WeHandScore += defendersPoints / 2;
-					break;
-			}
+			Scoring.AwardGamePts(theBid, bidders.Item1);
+			Scoring.AwardGamePts(theBid, bidders.Item2);
+
+			Scoring.AwardGamePts(defenderPts / 1, defenders.Item1);
+			Scoring.AwardGamePts(defenderPts / 1, defenders.Item2);
 		}
 		else
 		{
 			// Bid failure
-			switch (Maker)
-			{
-				case 0:
-				case 2:
-					WeHandScore += 0;
-					TheyHandScore += defendersPoints;
-					break;
-				case 1:
-				case 3:
-					TheyHandScore += 0;
-					WeHandScore += defendersPoints;
-					break;
-			}
+			Scoring.AwardGamePts(defenderPts, defenders.Item1);
+			Scoring.AwardGamePts(defenderPts, defenders.Item2);
 		}
 	}
+
+	
 }

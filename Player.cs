@@ -12,8 +12,8 @@ public class Player
 {
     public bool IsBot;
     public TeamKind Team = TeamKind.Unassigned;
-    public int HandPoints;
-    public int GameScore;
+    // public int HandPoints;
+    // public int GameScore;
     public bool HasPassed;
     public Bid Bid;
     public List<Card> Hand = [];
@@ -44,7 +44,7 @@ public class Player
     public void ResetForNewHand()
     {
         Team = TeamKind.Unassigned;
-        HandPoints = 0;
+        //HandPoints = 0;
         HasPassed = false;
         Bid = new Bid(BidKind.None, 0, Suit.None);
         Hand.Clear();

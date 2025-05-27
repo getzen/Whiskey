@@ -128,10 +128,10 @@ public partial class View : CanvasLayer
 
         // score table
         var weHand = GetNode<Label>("GUI/ScoreTable/HBoxContainer/WeColumn/Hand");
-        weHand.Text = game.WeHandScore.ToString();
+        weHand.Text = game.Scoring.WeHandScore().ToString();
 
         var theyHand = GetNode<Label>("GUI/ScoreTable/HBoxContainer/TheyColumn/Hand");
-        theyHand.Text = game.TheyHandScore.ToString();
+        theyHand.Text = game.Scoring.TheyHandScore().ToString();
     }
 
     internal void UpdateMessage(string message)

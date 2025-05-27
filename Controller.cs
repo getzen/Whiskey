@@ -303,6 +303,7 @@ public partial class Controller : Node
             case GameAction.PlayCard:
                 var player = Game.Active;
                 hand = Game.ActiveHand();
+                Game.NextPlayer();
 
                 View.UpdateHand(Game, player);
                 View.UpdateTrick(Game);
@@ -357,7 +358,7 @@ public partial class Controller : Node
             case GameAction.PresentScore:
                 NextAction = null;
                 Game.CompleteHand();
-                GD.Print($"We: {Game.WeGameScore}, They: {Game.TheyGameScore}");
+                GD.Print($"We: {Game.Scoring.WeHandScore()}, They: {Game.Scoring.TheyHandScore()}");
                 // View.ShowNextHandButton(true);
                 View.UpdateInfo(Game);
                 break;

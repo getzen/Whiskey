@@ -227,7 +227,8 @@ public class Bot
                 //     }
                 // }
 
-                simGame.PlayCardId(cardId); // advances player
+                simGame.PlayCardId(cardId);
+                simGame.NextPlayer();
 
                 while (!simGame.HandCompleted())
                 {
@@ -240,6 +241,7 @@ public class Bot
                     var ids = simGame.GetPlayableCardIds();
                     var randIdx = new Random().Next(ids.Count);
                     simGame.PlayCardId(ids[randIdx]);
+                    simGame.NextPlayer();
                 }
 
                 simGame.AwardNestCards();
@@ -247,11 +249,11 @@ public class Bot
 
                 if (montePlayer == 0 || montePlayer == 2)
                 {
-                    simScore += simGame.WeHandScore - simGame.TheyHandScore;
+                    simScore += simGame.Scoring.WeHandScore() - simGame.Scoring.TheyHandScore();
                 }
                 else
                 {
-                    simScore += simGame.TheyHandScore - simGame.WeHandScore;
+                    simScore += simGame.Scoring.TheyHandScore() - simGame.Scoring.WeHandScore();
                 }
             }
 
