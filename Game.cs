@@ -9,11 +9,6 @@ public class Game
 
 	public Scoring Scoring = new Scoring(300);
 
-	// public int WeHandScore;
-	// public int TheyHandScore;
-	// public int WeGameScore;
-	// public int TheyGameScore;
-
 	public List<Card> Deck = [];
 	public List<Card> Exchange = [];
 	public List<Card> Nest = [];
@@ -181,10 +176,13 @@ public class Game
 	public void SetTrumpSuit(Suit suit)
 	{
 		TrumpSuit = suit;
-		for (var p = 0; p < PlayerCount; p++)
+		if (Settings.JokerKind == JokerKind.Trump)
 		{
-			SetJokerSuit(Players[p].Hand, suit);
-			if (!Players[p].IsBot) SortHand(p);
+			for (var p = 0; p < PlayerCount; p++)
+			{
+				SetJokerSuit(Players[p].Hand, suit);
+				if (!Players[p].IsBot) SortHand(p);
+			}
 		}
 	}
 
@@ -249,8 +247,6 @@ public class Game
 			HighBid = bid;
 			Maker = Active;
 		}
-
-		// Scoring.UpdateBids...
 	}
 
 	public void AdvanceToNextBiddingPlayer()
@@ -440,7 +436,7 @@ public class Game
 		hand.RemoveAt(idx);
 		// var card = ActiveHand().RemoveAndReturnAt(idx);
 		card.FaceUp = true;
-		Trick.Add(Active, card, TrumpSuit);
+		Trick.Add(Active, card, TrumpSuit, Settings.JokerKind);
 	}
 
 	public void ResetHandEligibility(int p)

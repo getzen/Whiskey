@@ -313,12 +313,12 @@ public partial class Controller : Node
                 if (Game.Trick.Completed())
                 {
                     GD.Print("trick completed ===");
-                    DelayBeforeNextAction = 1.0;
+                    DelayBeforeNextAction = 2.0;
                     NextAction = GameAction.AwardTrick;
                 }
                 else
                 {
-                    DelayBeforeNextAction = 0.5;
+                    DelayBeforeNextAction = 1.0;
                     NextAction = GameAction.GetCardPlay;
                 }
                 break;
