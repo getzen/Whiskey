@@ -418,6 +418,7 @@ public class Game
 			}
 
 			if (eligible == 1) eligibleIds.Add(card.Id);
+			
 			card.Eligible = eligible;
 		}
 		return eligibleIds;

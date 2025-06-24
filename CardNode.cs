@@ -25,7 +25,6 @@ public partial class CardNode : Sprite2D
     private Texture2D FaceTexture;
     private Texture2D BackTexture;
 
-    // Declare C# events (not Godot). See Area2D node's signals in the editor.
     public delegate void CardNodeClickedEventHandler(object sender, int id);
     public static event CardNodeClickedEventHandler CardNodeClicked;
 

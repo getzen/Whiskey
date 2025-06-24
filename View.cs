@@ -68,18 +68,24 @@ public partial class View : CanvasLayer
             // Find the CardNode with the highest ZIndex (top card).
             var highestId = -1;
             var highestZ = -9999;
+            var highestEligible = 0;
 
             foreach (var cardId in cardIdsClicked)
             {
-                var cardNodeZ = FindCardNode(cardId).ZIndex;
-                if (cardNodeZ > highestZ)
+                var cardNode = FindCardNode(cardId);
+                if (cardNode.ZIndex > highestZ)
                 {
-                    highestZ = cardNodeZ;
+                    highestZ = cardNode.ZIndex;
                     highestId = cardId;
+                    highestEligible = cardNode.Eligible;
+                    GD.Print("id, eligible: ", highestId, ", ", highestEligible);
                 }
             }
-            // Inform the Controller.
-            CardClicked.Invoke(this, highestId);
+            if (highestEligible == 1)
+            {
+                // Inform the Controller.
+                CardClicked.Invoke(this, highestId);
+            }
             cardIdsClicked.Clear();
         }
     }
