@@ -132,6 +132,12 @@ public partial class View : CanvasLayer
 
         var theyHand = GetNode<Label>("GUI/ScoreTable/HBoxContainer/TheyColumn/Hand");
         theyHand.Text = game.Scoring.TheyHandScore().ToString();
+
+        var weGame = GetNode<Label>("GUI/ScoreTable/HBoxContainer/WeColumn/Game");
+        weGame.Text = game.Scoring.WeGameScore().ToString();
+
+        var theyGame = GetNode<Label>("GUI/ScoreTable/HBoxContainer/TheyColumn/Game");
+        theyGame.Text = game.Scoring.TheyGameScore().ToString();
     }
 
     internal void UpdateMessage(string message)

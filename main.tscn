@@ -301,10 +301,10 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Hand"
 
-[node name="Total" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/Labels"]
+[node name="Game" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/Labels"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Total"
+text = "Game"
 
 [node name="WeColumn" type="VBoxContainer" parent="View/GUI/ScoreTable/HBoxContainer"]
 custom_minimum_size = Vector2(75, 0)
@@ -323,7 +323,7 @@ theme_override_font_sizes/font_size = 20
 text = "0	"
 horizontal_alignment = 2
 
-[node name="Total" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/WeColumn"]
+[node name="Game" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/WeColumn"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "0"
@@ -345,7 +345,7 @@ theme_override_font_sizes/font_size = 20
 text = "0"
 horizontal_alignment = 2
 
-[node name="Total" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/TheyColumn"]
+[node name="Game" type="Label" parent="View/GUI/ScoreTable/HBoxContainer/TheyColumn"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "0"

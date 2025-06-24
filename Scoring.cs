@@ -18,9 +18,8 @@ public struct Scoring
 
     public Scoring DeepCopy()
     {
-        // Handy method to copy Array elements (as long as they don't contain refs themselves).
-        // System.Array.Copy(SomeArray, clone.SomeArray, SomeArray.Length);
         var copy = new Scoring(WinScore);
+        // Handy method to copy Array elements (as long as they don't contain refs themselves).
         System.Array.Copy(Tricks, copy.Tricks, Tricks.Length);
         System.Array.Copy(Nest, copy.Nest, Nest.Length);
         System.Array.Copy(Game, copy.Game, Game.Length);
@@ -61,8 +60,18 @@ public struct Scoring
         return CombinedHandScoreFor(0, 2);
     }
 
-     public int TheyHandScore()
+    public int TheyHandScore()
     {
         return CombinedHandScoreFor(1, 3);
+    }
+    
+    public int WeGameScore()
+    {
+        return Game[0];
+    }
+
+     public int TheyGameScore()
+    {
+        return Game[1];
     }
 }
