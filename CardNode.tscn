@@ -19,10 +19,12 @@ offset_bottom = 151.0
 theme = SubResource("Theme_1hc2o")
 text = "15 pts"
 
+[node name="TextureButton" type="TextureButton" parent="."]
+
 [node name="Area2D" type="Area2D" parent="."]
+metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_st4vi")
 
 [connection signal="input_event" from="Area2D" to="." method="OnArea2DInputEvent"]
-[connection signal="mouse_entered" from="Area2D" to="." method="OnArea2dMouseEntered"]

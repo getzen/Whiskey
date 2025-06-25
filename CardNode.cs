@@ -48,10 +48,28 @@ public partial class CardNode : Sprite2D
         SetPoints(card.Points);
 
         // Set the Area2D click detection shape.
-        var shape = new RectangleShape2D();
-        shape.Size = GetRect().Size; // GetRect() accounts for scale.
-        var collision = GetNode<CollisionShape2D>("Area2D/CollisionShape2D");
-        collision.Shape = shape;
+        // var shape = new RectangleShape2D();
+        // shape.Size = GetRect().Size; // GetRect() accounts for scale.
+        // var collision = GetNode<CollisionShape2D>("Area2D/CollisionShape2D");
+        // collision.Shape = shape;
+
+        // Rather than use an Area2D with a CollisionShape2D and then parse InputEvents,
+        // we will use TextureButton with no texture. We set it to the size of the FaceTexture.
+
+        // ???We can't just use the TextureButton without the Sprite2D since the later let's us
+        // modulate the texture color.
+        var button = GetNode<TextureButton>("TextureButton");
+        var texSize = FaceTexture.GetSize();
+        button.Size = texSize;
+        button.Position = -(texSize * 0.5f);
+        button.Pressed += OnButtonPressed;
+
+
+        // var area = GetNode<Area2D>("Area2D");
+        // var collObj = GetNode<CollisionObject2D>("Area2D/CollisionObject2D");
+        // area.InputEvent += OnArea2DInputEvent;
+        // // We can use lambdas when we need to bind additional parameters.
+        // collObj.InputEvent += () => OnArea2DInputEvent(InputEvent inputEvent);
     }
 
     string TexturePath(Card card)
@@ -108,12 +126,20 @@ public partial class CardNode : Sprite2D
         GetNode<Label>("PointsLabel").Visible = up;
     }
 
-    // Send an event if the node has been clicked.
-    public void OnArea2DInputEvent(Node viewport, InputEvent inputEvent, int shapeIndex)
+    // // Send an event if the node has been clicked.
+    // public void OnArea2DInputEvent(Node viewport, InputEvent inputEvent, int shapeIndex)
+    // {
+    //     if (inputEvent is InputEventMouseButton && inputEvent.IsReleased())
+    //     {
+    //         CardNodeClicked.Invoke(this, Id);
+    //     }
+    // }
+
+    private void OnButtonPressed()
     {
-        if (inputEvent is InputEventMouseButton && inputEvent.IsReleased())
+        if (Eligible == 1)
         {
-            CardNodeClicked.Invoke(this, Id);
+            GD.Print("button pressed: ", Id);
         }
     }
 
