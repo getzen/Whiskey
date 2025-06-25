@@ -248,7 +248,6 @@ public partial class Controller : Node
                 View.CardClicked -= OnHumanCardExchanged;
                 var hand = Game.Players[Game.Maker].Hand;
                 View.ResetEligibility(hand);
-                View.ResetEligibility(Game.Nest);
                 View.ShowDoneExchangingButton(false);
                 View.UpdateExchange(Game);
                 View.UpdateNest(Game, true);

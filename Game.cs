@@ -366,7 +366,8 @@ public class Game
 		while (Exchange.Count > 0)
 		{
 			var card = Exchange.Pop();
-			card.FaceUp = true; //////////////////////// false
+			card.FaceUp = true;
+			card.Eligible = -1;
 			Nest.Add(card);
 		}
 	}
@@ -418,7 +419,7 @@ public class Game
 			}
 
 			if (eligible == 1) eligibleIds.Add(card.Id);
-			
+
 			card.Eligible = eligible;
 		}
 		return eligibleIds;

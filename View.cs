@@ -1,15 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
 using Godot;
 
-struct CardClickDatum
-{
-    public int Id;
-    public int ZIndex;
-    public int Eligible;
-}
 
 public partial class View : CanvasLayer
 {
@@ -24,9 +15,6 @@ public partial class View : CanvasLayer
 
     // Holds a ref to the card nodes for easy searching.
     List<CardNode> cardNodes = [];
-
-    // See OnCardNodeClicked() and _Process().
-    List<CardClickDatum> cardClickedData = [];
 
     // Declare C# events (not Godot) for the Controller to subscribe to.
     public delegate void CardClickedEventHandler(object sender, int id);
@@ -67,25 +55,13 @@ public partial class View : CanvasLayer
 
     }
 
-    public override void _Process(double delta)
-    {
-        if (cardClickedData.Count > 0)
-        {
-            GD.Print("count: ", cardClickedData.Count);
-            // Sort to find the top one.
-            cardClickedData.Sort((card1, card2) => card1.ZIndex.CompareTo(card2.ZIndex));
-            var topCard = cardClickedData.Last();
-            if (topCard.Eligible == 1) // only sent the message if eligible
-            {
-                CardClicked.Invoke(this, topCard.Id); // picked up by Controller
-            }
-            cardClickedData.Clear();
-        }
-    }
+    // public override void _Process(double delta)
+    // {
+    // }
 
-    public override void _Input(InputEvent theEvent)
-    {
-    }
+    // public override void _Input(InputEvent theEvent)
+    // {
+    // }
 
     public void CreateCardView(Card card)
     {
@@ -112,12 +88,12 @@ public partial class View : CanvasLayer
         return null;
     }
 
-    // Event handler for CardNode event.
+    // Event handler for CardNode pressed event. That event could be connected to
+    // the Controller directly, but it seems prudent to pass it through the View
+    // in case other action needs to be taken.
     private void OnCardNodeClicked(object sender, int id)
     {
-        var cardNode = FindCardNode(id);
-        var data = new CardClickDatum { Id = id, ZIndex = cardNode.ZIndex, Eligible = cardNode.Eligible };
-        cardClickedData.Add(data);
+        CardClicked.Invoke(this, id); // picked up by Controller
     }
 
     public void UpdateInfo(Game game)
