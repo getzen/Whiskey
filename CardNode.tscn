@@ -1,11 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cly5bmkuvct18"]
+[gd_scene load_steps=3 format=3 uid="uid://cly5bmkuvct18"]
 
 [ext_resource type="Script" uid="uid://dcsufoo6vmwbm" path="res://CardNode.cs" id="1_tmb6s"]
 
 [sub_resource type="Theme" id="Theme_1hc2o"]
 default_font_size = 40
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_st4vi"]
 
 [node name="CardNode" type="Sprite2D"]
 script = ExtResource("1_tmb6s")
@@ -20,11 +18,3 @@ theme = SubResource("Theme_1hc2o")
 text = "15 pts"
 
 [node name="TextureButton" type="TextureButton" parent="."]
-
-[node name="Area2D" type="Area2D" parent="."]
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-shape = SubResource("RectangleShape2D_st4vi")
-
-[connection signal="input_event" from="Area2D" to="." method="OnArea2DInputEvent"]

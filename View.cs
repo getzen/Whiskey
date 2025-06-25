@@ -71,6 +71,7 @@ public partial class View : CanvasLayer
     {
         if (cardClickedData.Count > 0)
         {
+            GD.Print("count: ", cardClickedData.Count);
             // Sort to find the top one.
             cardClickedData.Sort((card1, card2) => card1.ZIndex.CompareTo(card2.ZIndex));
             var topCard = cardClickedData.Last();
