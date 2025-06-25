@@ -1,7 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Godot;
+
+struct CardClickDatum
+{
+    public int Id;
+    public int ZIndex;
+    public int Eligible;
+}
 
 public partial class View : CanvasLayer
 {
@@ -17,9 +25,8 @@ public partial class View : CanvasLayer
     // Holds a ref to the card nodes for easy searching.
     List<CardNode> cardNodes = [];
 
-    // Holds the id of the CardNodes that send CardNodeClicked events.
-    // The list is then searched for the highest ZIndex to find the top card.
-    List<int> cardIdsClicked = [];
+    // See OnCardNodeClicked() and _Process().
+    List<CardClickDatum> cardClickedData = [];
 
     // Declare C# events (not Godot) for the Controller to subscribe to.
     public delegate void CardClickedEventHandler(object sender, int id);
@@ -27,7 +34,6 @@ public partial class View : CanvasLayer
 
     public delegate void HumanBidMadeEventHandler(object sender, Bid bid);
     public static event HumanBidMadeEventHandler HumanBidMade;
-
 
     public View()
     {
@@ -63,30 +69,16 @@ public partial class View : CanvasLayer
 
     public override void _Process(double delta)
     {
-        if (cardIdsClicked.Count > 0)
+        if (cardClickedData.Count > 0)
         {
-            // Find the CardNode with the highest ZIndex (top card).
-            var highestId = -1;
-            var highestZ = -9999;
-            var highestEligible = 0;
-
-            foreach (var cardId in cardIdsClicked)
+            // Sort to find the top one.
+            cardClickedData.Sort((card1, card2) => card1.ZIndex.CompareTo(card2.ZIndex));
+            var topCard = cardClickedData.Last();
+            if (topCard.Eligible == 1) // only sent the message if eligible
             {
-                var cardNode = FindCardNode(cardId);
-                if (cardNode.ZIndex > highestZ)
-                {
-                    highestZ = cardNode.ZIndex;
-                    highestId = cardId;
-                    highestEligible = cardNode.Eligible;
-                    GD.Print("id, eligible: ", highestId, ", ", highestEligible);
-                }
+                CardClicked.Invoke(this, topCard.Id); // picked up by Controller
             }
-            if (highestEligible == 1)
-            {
-                // Inform the Controller.
-                CardClicked.Invoke(this, highestId);
-            }
-            cardIdsClicked.Clear();
+            cardClickedData.Clear();
         }
     }
 
@@ -122,7 +114,9 @@ public partial class View : CanvasLayer
     // Event handler for CardNode event.
     private void OnCardNodeClicked(object sender, int id)
     {
-        cardIdsClicked.Add(id);
+        var cardNode = FindCardNode(id);
+        var data = new CardClickDatum { Id = id, ZIndex = cardNode.ZIndex, Eligible = cardNode.Eligible };
+        cardClickedData.Add(data);
     }
 
     public void UpdateInfo(Game game)
@@ -360,7 +354,7 @@ public partial class View : CanvasLayer
 
     }
 
-   
+
 
     internal void GetBotDiscards(Game game)
     {
@@ -375,7 +369,7 @@ public partial class View : CanvasLayer
 
     internal void ShowDoneExchangingButton(bool visible)
     {
-         doneButton.Visible = visible;
+        doneButton.Visible = visible;
     }
 
     internal void SetDiscardableHandCards(Game game)
