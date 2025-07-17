@@ -134,6 +134,7 @@ public partial class View : CanvasLayer
     {
         var cardNode = FindCardNode(card.Id);
         cardNode.Eligible = card.Eligible;
+        cardNode.Highlight = card.Highlight;
         cardNode.SetFaceUp(card.FaceUp);
         cardNode.ZIndex = geom.Z;
         TweenCardPosition(cardNode, geom.Pos, 0.3f);
@@ -215,6 +216,15 @@ public partial class View : CanvasLayer
             var card = cards[i];
             if (card != null)
             {
+                if (game.Trick.Winner == i)
+                {
+                    card.Highlight = true;
+                }
+                else
+                {
+                    card.Highlight = false;
+                }
+
                 var geom = ViewGeom.TrickCardGeom(i, game.PlayerCount);
                 UpdateCard(card, geom);
             }
@@ -227,6 +237,7 @@ public partial class View : CanvasLayer
         for (var i = 0; i < cards.Count; i++)
         {
             var card = cards[i];
+            card.Highlight = false;
             var geom = ViewGeom.TakenGeom(player, game.PlayerCount);
             UpdateCard(card, geom);
         }

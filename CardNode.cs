@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections;
 
 public partial class CardNode : Sprite2D
 {
@@ -17,6 +18,26 @@ public partial class CardNode : Sprite2D
                 0 => Colors.Gray,
                 _ => Colors.White,
             };
+            var button_active = _eligible switch
+            {
+                1 => true,
+                _ => false,
+            };
+            GetNode<TextureButton>("TextureButton").Disabled = !button_active;
+            // Debugging:
+            //GetNode<ReferenceRect>("ReferenceRect").Visible = button_active;
+        }
+    }
+
+    private bool _hightlight;
+    public bool Highlight
+    {
+        get => _hightlight;
+        set
+        {
+            _hightlight = value;
+            var highlightNode = GetNode<Sprite2D>("Highlight");
+            highlightNode.Visible = value;
         }
     }
 
@@ -34,6 +55,7 @@ public partial class CardNode : Sprite2D
 
     public override void _Ready()
     {
+        Highlight = false;
     }
 
     public void Setup(Card card)
@@ -56,6 +78,11 @@ public partial class CardNode : Sprite2D
         button.Size = texSize;
         button.Position = -(texSize * 0.5f);
         button.Pressed += OnButtonPressed;
+
+        // Hit testing
+        var rect = GetNode<ReferenceRect>("ReferenceRect");
+        rect.Size = button.Size;
+        rect.Position = button.Position;
     }
 
     string TexturePath(Card card)

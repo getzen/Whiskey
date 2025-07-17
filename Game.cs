@@ -436,8 +436,8 @@ public class Game
 		}
 		var card = hand[idx];
 		hand.RemoveAt(idx);
-		// var card = ActiveHand().RemoveAndReturnAt(idx);
 		card.FaceUp = true;
+		card.Eligible = -1;
 		Trick.Add(Active, card, TrumpSuit, Settings.JokerKind);
 	}
 

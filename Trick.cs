@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Security.AccessControl;
 
 public class Trick
 {
@@ -58,6 +56,15 @@ public class Trick
     public bool IsEmpty()
     {
         return CardsPlayed == 0;
+    }
+
+    public Card WinningCard()
+    {
+        if (Winner != -1)
+        {
+            return Cards[Winner];
+        }
+        return null;
     }
 
     public bool Completed()

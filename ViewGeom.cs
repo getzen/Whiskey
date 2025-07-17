@@ -59,7 +59,7 @@ public struct ViewGeom
         float rad = PlayerRadiansFromCenter(player, playerCount);
         return new ViewGeom
         {
-            Pos = PositionFrom(Constants.PLAY_CENTER, rad, 220f),
+            Pos = PositionFrom(Constants.PLAY_CENTER, rad, 250f),
             Rot = 0f,
             Z = 0
         };
@@ -146,7 +146,7 @@ public struct ViewGeom
     public static ViewGeom HandCardGeom(int player, int index, int handCount, int playerCount, bool isBot)
     {
         const float distanceFromCenter = 400f;
-        float maxWidth = isBot ? 350f : 530f;
+        float maxWidth = isBot ? 350f : 510f;
         const float maxSpacing = 60f;
 
         float computedWidth = maxWidth / handCount;
@@ -187,7 +187,7 @@ public struct ViewGeom
 
     public static ViewGeom TakenGeom(int player, int playerCount)
     {
-        const float distanceFromCenter = 450f;
+        const float distanceFromCenter = 600f;
         float rad = PlayerRadiansFromCenter(player, playerCount);
         Vector2 pos = PositionFrom(Constants.PLAY_CENTER, rad, distanceFromCenter);
         float angle = PlayerRotation(player, playerCount);

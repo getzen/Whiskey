@@ -16,6 +16,7 @@ public class Card
     public bool FaceUp;
     // -1 = N/A, 0 = ineligible, 1 = eligible
     public int Eligible;
+    public bool Highlight;
 
     public Card(int id, Suit suit, int rank, int points)
     {
